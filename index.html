@@ -77,15 +77,25 @@
     <!-- MAIN FORM -->
     <div class="max-w-xl mx-auto bg-zinc-900 border border-pink-500/30 rounded-2xl p-6 mb-8 no-print neon-border">
         
-        <!-- Top Details Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div>
-                <label class="block text-sm font-receipt font-semibold mb-2 text-pink-300">Choose Store</label>
-                <select id="biz-name" class="w-full bg-zinc-950 border border-pink-500/50 text-pink-100 font-receipt rounded-lg p-3 outline-none focus:border-pink-500 transition-colors" onchange="updateReceipt()">
+        <!-- Separated Choose Store Section with Neon Arrow -->
+        <div class="mb-6 relative">
+            <label class="block text-sm font-receipt font-semibold mb-2 text-pink-300">Choose Store</label>
+            <div class="relative">
+                <select id="biz-name" class="w-full bg-zinc-950 border border-pink-500/50 text-pink-100 font-receipt rounded-lg p-3 appearance-none outline-none focus:border-pink-500 transition-colors cursor-pointer" onchange="updateReceipt()">
                     <option value="Elena's Fine Goods">Elena's Fine Goods</option>
                     <option value="Han Han">Han Han</option>
                 </select>
+                <!-- Custom Neon Pink Arrow -->
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
+                    <svg class="fill-current h-5 w-5 text-pink-500 drop-shadow-[0_0_5px_rgba(236,72,153,0.8)]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                        <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                    </svg>
+                </div>
             </div>
+        </div>
+
+        <!-- Customer & Delivery Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
             <div>
                 <label class="block text-sm font-receipt font-semibold mb-2 text-pink-300">Customer Name</label>
                 <input type="text" id="customer-name" placeholder="Customer Name" class="w-full bg-zinc-950 border border-pink-500/50 text-pink-100 rounded-lg p-3 outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
@@ -100,12 +110,12 @@
             </div>
         </div>
 
-        <!-- Dynamic Products Section -->
+        <!-- Dynamic Products Section (Improved Spacing) -->
         <div>
             <label class="block text-sm font-receipt font-semibold mb-2 text-pink-300">Products</label>
-            <div id="items-container" class="space-y-3">
+            <div id="items-container" class="space-y-4">
                 
-                <div class="item-row bg-zinc-950/50 p-3 rounded-lg border border-pink-500/20 grid grid-cols-[1fr,4.5rem,4.5rem,2.5rem,auto] gap-2 items-center">
+                <div class="item-row bg-zinc-950/50 p-4 rounded-lg border border-pink-500/20 grid grid-cols-[1fr,5rem,4rem,2.5rem,auto] gap-3 items-center">
                     
                     <input type="text" placeholder="Item Name" class="item-desc w-full bg-zinc-900 border border-pink-500/50 text-pink-100 rounded-lg p-2 outline-none focus:border-pink-500 transition-colors" oninput="handleDynamicRow(this); updateReceipt();">
                     
@@ -129,8 +139,10 @@
     <div id="receipt-container" class="max-w-md mx-auto bg-zinc-950 border-2 border-pink-500 shadow-[0_0_20px_rgba(236,72,153,0.3)] p-8 font-receipt text-base text-pink-100 relative rounded-md">
         
         <div class="text-center mb-8">
-            <h1 id="display-biz-name" class="text-4xl font-bold tracking-widest text-pink-400 neon-text font-header mb-2">Elena's Fine Goods</h1>
-            <p class="text-xs text-pink-300/70 mt-1 uppercase tracking-widest">Acknowledgement Receipt</p>
+            <!-- Adjusted leading/line-height to fix overlap -->
+            <h1 id="display-biz-name" class="text-4xl font-bold tracking-widest text-pink-400 neon-text font-header mb-1 leading-none">Elena's Fine Goods</h1>
+            <!-- Scaled down the subtext -->
+            <p class="text-[10px] text-pink-300/70 uppercase tracking-widest mt-1">Acknowledgement Receipt</p>
         </div>
 
         <div class="mb-6 text-pink-200 text-sm space-y-2">
@@ -249,7 +261,8 @@
             const container = document.getElementById('items-container');
             const row = document.createElement('div');
             
-            row.className = 'item-row bg-zinc-950/50 p-3 rounded-lg border border-pink-500/20 grid grid-cols-[1fr,4.5rem,4.5rem,2.5rem,auto] gap-2 items-center';
+            // Adjusted classes in the new item row to match the updated spacing
+            row.className = 'item-row bg-zinc-950/50 p-4 rounded-lg border border-pink-500/20 grid grid-cols-[1fr,5rem,4rem,2.5rem,auto] gap-3 items-center';
             row.innerHTML = `
                 <input type="text" placeholder="Item Name" class="item-desc w-full bg-zinc-900 border border-pink-500/50 text-pink-100 rounded-lg p-2 outline-none focus:border-pink-500 transition-colors" oninput="handleDynamicRow(this); updateReceipt();">
                 <input type="number" placeholder="Price" class="item-price w-full bg-zinc-900 border border-pink-500/50 text-pink-100 rounded-lg p-2 text-center outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
