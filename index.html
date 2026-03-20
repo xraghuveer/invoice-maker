@@ -3,126 +3,195 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FB Marketplace Receipt Generator</title>
+    <title>Kitty Invoice Maker</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* This hides the input form when you click print/save to PDF */
+        /* Import Custom Fonts */
+        @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Pacifico&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Indie+Flower&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=JetBrains+Mono:wght@400;700;800&display=swap');
+
+        /* Force browsers to print/save the dark background and neon colors */
         @media print {
             .no-print { display: none !important; }
-            body { background-color: white; margin: 0; padding: 0; }
-            #receipt-container { box-shadow: none; width: 100%; margin: 0; padding: 0; }
+            body { background-color: #09090b !important; margin: 0; padding: 0; }
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            #receipt-container { margin: 0 auto; width: 100%; box-shadow: none; border: none; }
         }
-        /* Paper receipt aesthetic */
-        .paper-font { font-family: 'Courier New', Courier, monospace; }
-        .dashed-line { border-bottom: 2px dashed #cbd5e1; margin: 12px 0; }
+        
+        /* Font Classes */
+        body { font-family: 'Inter', sans-serif; }
+        .font-header { font-family: 'Pacifico', cursive; }
+        .font-receipt { font-family: 'JetBrains Mono', monospace; }
+        .font-note { font-family: 'Indie Flower', cursive; }
+
+        /* Neon glowing effects */
+        .neon-text { text-shadow: 0 0 5px #ec4899, 0 0 15px #ec4899; }
+        .neon-border { box-shadow: 0 0 10px rgba(236, 72, 153, 0.5), inset 0 0 5px rgba(236, 72, 153, 0.3); }
+        .dashed-line { border-bottom: 2px dashed #ec4899; margin: 12px 0; opacity: 0.5; }
     </style>
 </head>
-<body class="bg-slate-100 text-gray-800 font-sans p-4 pb-24 md:p-8">
+<body class="bg-zinc-950 text-pink-100 p-4 pb-28 md:p-8 min-h-screen selection:bg-pink-500 selection:text-white">
+
+    <!-- Header -->
+    <div class="max-w-lg mx-auto text-center mb-6 no-print">
+        <h1 class="text-4xl text-pink-500 tracking-wider neon-text font-header mt-4">Kitty Invoice Maker</h1>
+    </div>
 
     <!-- Input Form Section -->
-    <div class="max-w-lg mx-auto bg-white rounded-2xl shadow-sm p-6 mb-8 no-print border border-slate-200">
-        <h2 class="text-2xl font-bold text-slate-800 mb-2">Create a Bill</h2>
-        <p class="text-sm text-slate-500 mb-6">Fill out the details below step-by-step.</p>
+    <div class="max-w-lg mx-auto bg-zinc-900 border border-pink-500/30 rounded-2xl p-6 mb-8 no-print neon-border">
+        <h2 class="text-xl font-bold text-pink-400 mb-4 font-receipt tracking-tight">Enter Details</h2>
 
         <div class="space-y-5">
-            <!-- Step 1 -->
+            <!-- Step 1: Business Name -->
             <div>
-                <label class="block text-sm font-semibold mb-1">Step 1: Customer Name</label>
-                <input type="text" id="customer-name" placeholder="e.g., Juan Dela Cruz" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-3 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all" oninput="updateReceipt()">
+                <label class="block text-sm font-semibold mb-1 text-pink-300">Step 1: Choose Store</label>
+                <select id="biz-name" class="w-full bg-zinc-950 border border-pink-500/50 text-pink-100 rounded-lg p-3 outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-colors" onchange="updateReceipt()">
+                    <option value="Elena's Fine Goods">Elena's Fine Goods</option>
+                    <option value="Han Han">Han Han</option>
+                </select>
             </div>
 
-            <!-- Step 2 -->
-            <div>
-                <label class="block text-sm font-semibold mb-1">Step 2: Item Description</label>
-                <input type="text" id="item-desc" placeholder="e.g., Pre-loved Nike Shoes Size 9" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-3 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all" oninput="updateReceipt()">
-            </div>
-
-            <!-- Step 3 & 4 -->
-            <div class="grid grid-cols-2 gap-4">
+            <!-- Step 2: Customer Name & Phone -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-semibold mb-1">Step 3: Item Price (₱)</label>
-                    <input type="number" id="item-price" placeholder="0" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-3 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all" oninput="updateReceipt()">
+                    <label class="block text-sm font-semibold mb-1 text-pink-300">Step 2: Customer Name</label>
+                    <input type="text" id="customer-name" placeholder="Buyer's Name" class="w-full bg-zinc-950 border border-pink-500/50 text-pink-100 rounded-lg p-3 outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-colors" oninput="updateReceipt()">
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold mb-1">Step 4: Delivery Fee (₱)</label>
-                    <input type="number" id="shipping-fee" placeholder="0" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-3 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all" oninput="updateReceipt()">
+                    <label class="block text-sm font-semibold mb-1 text-pink-300">Customer Phone</label>
+                    <input type="tel" id="customer-phone" placeholder="09XX XXX XXXX" class="w-full bg-zinc-950 border border-pink-500/50 text-pink-100 rounded-lg p-3 outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-colors" oninput="updateReceipt()">
+                </div>
+            </div>
+
+            <!-- Step 3: Item Details & Picture -->
+            <div class="bg-zinc-950/50 p-4 rounded-lg border border-pink-500/20">
+                <label class="block text-sm font-semibold mb-1 text-pink-300">Step 3: Item Name</label>
+                <input type="text" id="item-desc" placeholder="Product Name" class="w-full bg-zinc-900 border border-pink-500/50 text-pink-100 rounded-lg p-3 mb-3 outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
+                
+                <label class="block text-sm font-semibold mb-1 text-pink-300">Upload Product Picture (Optional)</label>
+                <input type="file" id="item-image" accept="image/*" class="w-full text-sm text-pink-200 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-pink-500 file:text-white hover:file:bg-pink-600 cursor-pointer transition-colors">
+            </div>
+
+            <!-- Step 4 & 5: Pricing -->
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-semibold mb-1 text-pink-300">Step 4: Price (₱)</label>
+                    <input type="number" id="item-price" placeholder="0" class="w-full bg-zinc-950 border border-pink-500/50 text-pink-100 rounded-lg p-3 outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-1 text-pink-300">Step 5: Delivery (₱)</label>
+                    <input type="number" id="shipping-fee" placeholder="0" class="w-full bg-zinc-950 border border-pink-500/50 text-pink-100 rounded-lg p-3 outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Receipt Preview Section -->
-    <div id="receipt-container" class="max-w-sm mx-auto bg-white shadow-md p-6 paper-font text-sm border-t-8 border-slate-800 relative">
+    <div id="receipt-container" class="max-w-sm mx-auto bg-zinc-950 border-2 border-pink-500 shadow-[0_0_20px_rgba(236,72,153,0.3)] p-6 font-receipt text-sm text-pink-100 relative rounded-md">
+        
         <div class="text-center mb-6">
-            <h1 class="text-xl font-bold uppercase tracking-widest">Official Receipt</h1>
-            <p class="text-xs text-slate-500 mt-1">FB Marketplace Seller</p>
+            <h1 id="display-biz-name" class="text-3xl font-bold tracking-widest text-pink-400 neon-text font-header mb-2">Elena's Fine Goods</h1>
+            <p class="text-xs text-pink-300/70 mt-1 uppercase tracking-widest">Official E-Receipt</p>
         </div>
 
-        <div class="mb-4">
-            <div class="flex justify-between">
+        <div class="mb-4 text-pink-200 text-xs">
+            <div class="flex justify-between mb-1">
                 <span>Date:</span>
                 <span id="display-date" class="font-bold"></span>
             </div>
-            <div class="flex justify-between mt-1">
+            <div class="flex justify-between mb-1">
                 <span>Billed To:</span>
-                <span id="display-name" class="font-bold">-----</span>
+                <span id="display-name" class="font-bold text-pink-400">-----</span>
+            </div>
+            <div class="flex justify-between">
+                <span>Contact:</span>
+                <span id="display-phone" class="font-bold text-pink-400">-----</span>
             </div>
         </div>
 
         <div class="dashed-line"></div>
 
-        <div class="flex justify-between font-bold mb-2 uppercase text-xs">
+        <div class="flex justify-between font-bold mb-3 uppercase text-xs text-pink-400">
             <span>Description</span>
             <span>Amount</span>
         </div>
         
-        <div class="flex justify-between mb-1">
-            <span id="display-item" class="pr-2">-----</span>
-            <span id="display-price">₱0.00</span>
+        <!-- Product Image Container -->
+        <div class="mb-4 flex justify-center">
+            <img id="display-image" class="hidden w-32 h-32 object-cover rounded-md border border-pink-500 shadow-[0_0_8px_rgba(236,72,153,0.4)]" alt="Product Image">
+        </div>
+
+        <div class="flex justify-between mb-2">
+            <span id="display-item" class="pr-2 text-pink-100">-----</span>
+            <span id="display-price" class="text-pink-300">₱0.00</span>
         </div>
         
         <div class="flex justify-between mb-1">
-            <span>Delivery/Shipping</span>
-            <span id="display-shipping">₱0.00</span>
+            <span class="text-pink-100">Delivery Fee</span>
+            <span id="display-shipping" class="text-pink-300">₱0.00</span>
         </div>
 
         <div class="dashed-line"></div>
 
         <div class="flex justify-between items-center mt-4 mb-8">
-            <span class="font-bold uppercase tracking-wide">Total Due</span>
-            <span id="display-total" class="font-bold text-xl">₱0.00</span>
+            <span class="font-bold uppercase tracking-wide text-pink-400">Total Due</span>
+            <span id="display-total" class="font-bold text-xl neon-text text-pink-500">₱0.00</span>
         </div>
 
-        <div class="text-center text-xs text-slate-500 mt-8">
-            <p>Thank you for trusting our shop!</p>
-            <p>Please take a screenshot for your records.</p>
+        <div class="text-center mt-8">
+            <p class="text-xl text-pink-400/80 font-note">Thank you for your purchase!</p>
+            <p class="text-[10px] text-pink-500/50 mt-2 font-receipt tracking-widest">✧ KITTY INVOICE MAKER ✧</p>
         </div>
     </div>
 
-    <!-- Sticky Print Button for Mobile -->
-    <div class="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 no-print flex justify-center shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-        <button onclick="window.print()" class="w-full max-w-lg bg-slate-800 text-white font-bold py-3 px-6 rounded-lg hover:bg-slate-700 active:scale-95 transition-all">
-            🖨️ Save as PDF / Print
+    <!-- Sticky Print Button -->
+    <div class="fixed bottom-0 left-0 right-0 p-4 bg-zinc-950/90 backdrop-blur-sm border-t border-pink-500/30 no-print flex justify-center z-50">
+        <button onclick="window.print()" class="w-full max-w-lg bg-pink-600 hover:bg-pink-500 text-white font-bold py-4 px-6 rounded-xl shadow-[0_0_15px_rgba(236,72,153,0.5)] active:scale-95 transition-all text-lg tracking-wide uppercase font-receipt">
+            ⚡ Save Digital Bill
         </button>
     </div>
 
     <script>
-        // Set today's date automatically
+        // Set today's date
         const today = new Date();
         document.getElementById('display-date').textContent = today.toLocaleDateString('en-PH');
 
-        // Function to update the receipt in real-time
+        // Handle Image Upload
+        document.getElementById('item-image').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            const imgElement = document.getElementById('display-image');
+            
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imgElement.src = e.target.result;
+                    imgElement.classList.remove('hidden');
+                }
+                reader.readAsDataURL(file);
+            } else {
+                imgElement.classList.add('hidden');
+                imgElement.src = "";
+            }
+        });
+
+        // Update Text and Numbers
         function updateReceipt() {
+            const bizName = document.getElementById('biz-name').value;
             const name = document.getElementById('customer-name').value || '-----';
+            const phone = document.getElementById('customer-phone').value || '-----';
             const itemDesc = document.getElementById('item-desc').value || '-----';
             const price = parseFloat(document.getElementById('item-price').value) || 0;
             const shipping = parseFloat(document.getElementById('shipping-fee').value) || 0;
             const total = price + shipping;
 
+            // Update DOM Elements
+            document.getElementById('display-biz-name').textContent = bizName;
             document.getElementById('display-name').textContent = name;
+            document.getElementById('display-phone').textContent = phone;
             document.getElementById('display-item').textContent = itemDesc;
             
-            // Format numbers to look like currency
+            // Number formatting
             document.getElementById('display-price').textContent = '₱' + price.toLocaleString('en-PH', {minimumFractionDigits: 2});
             document.getElementById('display-shipping').textContent = '₱' + shipping.toLocaleString('en-PH', {minimumFractionDigits: 2});
             document.getElementById('display-total').textContent = '₱' + total.toLocaleString('en-PH', {minimumFractionDigits: 2});
