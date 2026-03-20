@@ -11,96 +11,129 @@
         @import url('https://fonts.googleapis.com/css2?family=Indie+Flower&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=JetBrains+Mono:wght@400;700;800&display=swap');
 
-        /* Force browsers to print/save the dark background and neon colors */
+        /* Custom Theme & Fonts */
+        :root {
+            --neon-pink: #ec4899;
+            --neon-pink-dim: rgba(236, 72, 153, 0.4);
+            --dark-bg: #09090b;
+            --darker-bg: #0d0d11;
+        }
+        
+        body { font-family: 'Inter', sans-serif; background-color: var(--dark-bg); color: #fee2e2; }
+        .font-header { font-family: 'Pacifico', cursive; }
+        .font-receipt { font-family: 'JetBrains Mono', monospace; }
+        .font-note { font-family: 'Indie Flower', cursive; }
+
+        /* Neon & Styled Elements */
+        .neon-text { text-shadow: 0 0 5px var(--neon-pink), 0 0 15px var(--neon-pink); }
+        .neon-border { box-shadow: 0 0 10px var(--neon-pink-dim), inset 0 0 5px rgba(236, 72, 153, 0.3); }
+        .dashed-line { border-bottom: 2px dashed var(--neon-pink); margin: 12px 0; opacity: 0.5; }
+        
+        /* Input Overrides */
+        input[type="number"]::-webkit-inner-spin-button, 
+        input[type="number"]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; margin: 0; 
+        }
+        input[type="number"] { -moz-appearance: textfield; }
+
+        /* Camera Button Sticker Style */
+        .camera-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 3rem; /* square */
+            height: 3rem;
+            border-radius: 0.5rem;
+            border-width: 2px;
+            border-color: var(--neon-pink);
+            background-color: var(--darker-bg);
+            color: var(--neon-pink);
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+        .camera-button:active { transform: scale(0.95); box-shadow: 0 0 8px var(--neon-pink); }
+        .camera-button.has-image { background-color: var(--neon-pink); color: white; }
+
+        /* Print Settings (Best effort to retain dark theme and hide link) */
         @media print {
             .no-print { display: none !important; }
             body { background-color: #09090b !important; margin: 0; padding: 0; }
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
             #receipt-container { margin: 0 auto; width: 100%; box-shadow: none; border: none; }
+            .receipt-item { page-break-inside: avoid; }
         }
-        
-        /* Font Classes */
-        body { font-family: 'Inter', sans-serif; }
-        .font-header { font-family: 'Pacifico', cursive; }
-        .font-receipt { font-family: 'JetBrains Mono', monospace; }
-        .font-note { font-family: 'Indie Flower', cursive; }
+        @page { size: auto; margin: 0mm; } /* Best effort CSS for link removal */
 
-        /* Neon glowing effects */
-        .neon-text { text-shadow: 0 0 5px #ec4899, 0 0 15px #ec4899; }
-        .neon-border { box-shadow: 0 0 10px rgba(236, 72, 153, 0.5), inset 0 0 5px rgba(236, 72, 153, 0.3); }
-        .dashed-line { border-bottom: 2px dashed #ec4899; margin: 12px 0; opacity: 0.5; }
     </style>
 </head>
-<body class="bg-zinc-950 text-pink-100 p-4 pb-28 md:p-8 min-h-screen selection:bg-pink-500 selection:text-white">
+<body class="p-4 pb-48 md:p-8 min-h-screen selection:bg-pink-500 selection:text-white">
 
-    <!-- Header -->
-    <div class="max-w-lg mx-auto text-center mb-6 no-print">
-        <h1 class="text-4xl text-pink-500 tracking-wider neon-text font-header mt-4">Kitty Invoice Maker</h1>
+    <div class="max-w-xl mx-auto text-center mb-6 no-print">
+        <h1 class="text-4xl text-pink-500 tracking-wider neon-text font-header mt-4 mb-2">Kitty Invoice Maker</h1>
+        <p class="text-xs text-pink-300 font-receipt">Acknowledgement Receipt</p>
     </div>
 
-    <!-- Input Form Section -->
-    <div class="max-w-lg mx-auto bg-zinc-900 border border-pink-500/30 rounded-2xl p-6 mb-8 no-print neon-border">
-        <h2 class="text-xl font-bold text-pink-400 mb-4 font-receipt tracking-tight">Enter Details</h2>
-
-        <div class="space-y-5">
-            <!-- Step 1: Business Name -->
+    <div class="max-w-xl mx-auto bg-zinc-900 border border-pink-500/30 rounded-2xl p-6 mb-8 no-print neon-border space-y-5">
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-                <label class="block text-sm font-semibold mb-1 text-pink-300">Step 1: Choose Store</label>
-                <select id="biz-name" class="w-full bg-zinc-950 border border-pink-500/50 text-pink-100 rounded-lg p-3 outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-colors" onchange="updateReceipt()">
+                <label class="block text-xs font-receipt font-semibold mb-1 text-pink-300">Choose Store</label>
+                <select id="biz-name" class="w-full bg-zinc-950 border border-pink-500/50 text-pink-100 font-receipt rounded-lg p-3 outline-none focus:border-pink-500 transition-colors" onchange="updateReceipt()">
                     <option value="Elena's Fine Goods">Elena's Fine Goods</option>
                     <option value="Han Han">Han Han</option>
                 </select>
             </div>
-
-            <!-- Step 2: Customer Name & Phone -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-semibold mb-1 text-pink-300">Step 2: Customer Name</label>
-                    <input type="text" id="customer-name" placeholder="Buyer's Name" class="w-full bg-zinc-950 border border-pink-500/50 text-pink-100 rounded-lg p-3 outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-colors" oninput="updateReceipt()">
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold mb-1 text-pink-300">Customer Phone</label>
-                    <input type="tel" id="customer-phone" placeholder="09XX XXX XXXX" class="w-full bg-zinc-950 border border-pink-500/50 text-pink-100 rounded-lg p-3 outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-colors" oninput="updateReceipt()">
-                </div>
+            <div class="space-y-4">
+                <input type="text" id="customer-name" placeholder="Customer Name" class="w-full bg-zinc-950 border border-pink-500/50 text-pink-100 rounded-lg p-3 outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
+                <input type="tel" id="customer-phone" placeholder="Customer Phone (09..)" class="w-full bg-zinc-950 border border-pink-500/50 text-pink-100 rounded-lg p-3 outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
             </div>
+        </div>
 
-            <!-- Step 3: Item Details & Picture -->
-            <div class="bg-zinc-950/50 p-4 rounded-lg border border-pink-500/20">
-                <label class="block text-sm font-semibold mb-1 text-pink-300">Step 3: Item Name</label>
-                <input type="text" id="item-desc" placeholder="Product Name" class="w-full bg-zinc-900 border border-pink-500/50 text-pink-100 rounded-lg p-3 mb-3 outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
+        <div>
+            <label class="block text-xs font-receipt font-semibold mb-2 text-pink-300">Products</label>
+            <div id="items-container" class="space-y-3">
                 
-                <label class="block text-sm font-semibold mb-1 text-pink-300">Upload Product Picture (Optional)</label>
-                <input type="file" id="item-image" accept="image/*" class="w-full text-sm text-pink-200 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-pink-500 file:text-white hover:file:bg-pink-600 cursor-pointer transition-colors">
-            </div>
+                <div class="item-row bg-zinc-950/50 p-4 rounded-lg border border-pink-500/20 grid grid-cols-[1fr,5rem,auto,6rem,auto] gap-2 items-center">
+                    
+                    <input type="text" placeholder="Item Name" class="item-desc w-full bg-zinc-900 border border-pink-500/50 text-pink-100 rounded-lg p-3 outline-none focus:border-pink-500 transition-colors" oninput="handleDynamicRow(this); updateReceipt();">
+                    
+                    <input type="number" value="1" min="1" class="item-qty w-full bg-zinc-900 border border-pink-500/50 text-pink-100 rounded-lg p-3 text-center outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
+                    
+                    <label class="camera-button neon-border">
+                        <span class="text-xl">📷</span>
+                        <input type="file" accept="image/*" class="item-image hidden" onchange="handleImageUpload(this); updateReceipt();">
+                    </label>
 
-            <!-- Step 4 & 5: Pricing -->
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-semibold mb-1 text-pink-300">Step 4: Price (₱)</label>
-                    <input type="number" id="item-price" placeholder="0" class="w-full bg-zinc-950 border border-pink-500/50 text-pink-100 rounded-lg p-3 outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold mb-1 text-pink-300">Step 5: Delivery (₱)</label>
-                    <input type="number" id="shipping-fee" placeholder="0" class="w-full bg-zinc-950 border border-pink-500/50 text-pink-100 rounded-lg p-3 outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
+                    <input type="number" placeholder="Price" class="item-price w-full bg-zinc-900 border border-pink-500/50 text-pink-100 rounded-lg p-3 outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
+                    
+                    <button onclick="removeItem(this)" class="remove-btn invisible text-pink-600 hover:text-pink-400 font-bold px-2 py-1 rounded bg-zinc-900 border border-pink-600/50 text-xs transition-colors">X</button>
                 </div>
             </div>
+            
+            <button onclick="addNewItem()" class="mt-4 w-full border-2 border-dashed border-pink-500/50 text-pink-400 font-bold font-receipt py-3 rounded-xl hover:bg-pink-500/10 transition-colors">
+                + Add Item
+            </button>
+        </div>
+
+        <div>
+            <label class="block text-xs font-receipt font-semibold mb-1 text-pink-300">Delivery Fee (₱)</label>
+            <input type="number" id="shipping-fee" value="0" class="w-full bg-zinc-950 border border-pink-500/50 text-pink-100 rounded-lg p-3 outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
         </div>
     </div>
 
-    <!-- Receipt Preview Section -->
     <div id="receipt-container" class="max-w-sm mx-auto bg-zinc-950 border-2 border-pink-500 shadow-[0_0_20px_rgba(236,72,153,0.3)] p-6 font-receipt text-sm text-pink-100 relative rounded-md">
         
         <div class="text-center mb-6">
             <h1 id="display-biz-name" class="text-3xl font-bold tracking-widest text-pink-400 neon-text font-header mb-2">Elena's Fine Goods</h1>
-            <p class="text-xs text-pink-300/70 mt-1 uppercase tracking-widest">Official E-Receipt</p>
+            <p class="text-[10px] text-pink-300/70 mt-1 uppercase tracking-widest">Acknowledgement Receipt</p>
         </div>
 
-        <div class="mb-4 text-pink-200 text-xs">
-            <div class="flex justify-between mb-1">
+        <div class="mb-4 text-pink-200 text-xs space-y-1">
+            <div class="flex justify-between">
                 <span>Date:</span>
-                <span id="display-date" class="font-bold"></span>
+                <span id="display-date" class="font-bold">-----</span>
             </div>
-            <div class="flex justify-between mb-1">
+            <div class="flex justify-between">
                 <span>Billed To:</span>
                 <span id="display-name" class="font-bold text-pink-400">-----</span>
             </div>
@@ -112,21 +145,23 @@
 
         <div class="dashed-line"></div>
 
-        <div class="flex justify-between font-bold mb-3 uppercase text-xs text-pink-400">
-            <span>Description</span>
-            <span>Amount</span>
+        <div class="grid grid-cols-[1fr,2rem,5rem,6rem] gap-2 font-bold mb-3 uppercase text-[10px] text-pink-400 text-right">
+            <span class="text-left">Item Name</span>
+            <span>Qty</span>
+            <span>Price</span>
+            <span>Total</span>
         </div>
         
-        <!-- Product Image Container -->
-        <div class="mb-4 flex justify-center">
-            <img id="display-image" class="hidden w-32 h-32 object-cover rounded-md border border-pink-500 shadow-[0_0_8px_rgba(236,72,153,0.4)]" alt="Product Image">
+        <div id="receipt-items-list" class="space-y-4 mb-2 text-xs">
+            </div>
+        
+        <div class="dashed-line"></div>
+
+        <div class="flex justify-between mb-1 mt-3">
+            <span class="text-pink-100">Subtotal</span>
+            <span id="display-subtotal" class="text-pink-300">₱0.00</span>
         </div>
 
-        <div class="flex justify-between mb-2">
-            <span id="display-item" class="pr-2 text-pink-100">-----</span>
-            <span id="display-price" class="text-pink-300">₱0.00</span>
-        </div>
-        
         <div class="flex justify-between mb-1">
             <span class="text-pink-100">Delivery Fee</span>
             <span id="display-shipping" class="text-pink-300">₱0.00</span>
@@ -145,57 +180,163 @@
         </div>
     </div>
 
-    <!-- Sticky Print Button -->
-    <div class="fixed bottom-0 left-0 right-0 p-4 bg-zinc-950/90 backdrop-blur-sm border-t border-pink-500/30 no-print flex justify-center z-50">
-        <button onclick="window.print()" class="w-full max-w-lg bg-pink-600 hover:bg-pink-500 text-white font-bold py-4 px-6 rounded-xl shadow-[0_0_15px_rgba(236,72,153,0.5)] active:scale-95 transition-all text-lg tracking-wide uppercase font-receipt">
+    <div class="fixed bottom-0 left-0 right-0 p-4 bg-zinc-950/90 backdrop-blur-sm border-t border-pink-500/30 no-print flex flex-col items-center gap-2 z-50">
+        
+        <button id="url-tip-btn" class="bg-zinc-800 text-pink-300 text-xs px-4 py-2 rounded-full border border-pink-500/30 font-receipt hover:bg-pink-900 transition-colors">
+            How to Remove Page Link from PDF?
+        </button>
+
+        <button onclick="window.print()" class="w-full max-w-xl bg-pink-600 hover:bg-pink-500 text-white font-bold py-4 px-6 rounded-2xl shadow-[0_0_15px_rgba(236,72,153,0.5)] active:scale-95 transition-all text-lg tracking-wide uppercase font-receipt">
             ⚡ Save Digital Bill
         </button>
     </div>
 
     <script>
         // Set today's date
-        const today = new Date();
-        document.getElementById('display-date').textContent = today.toLocaleDateString('en-PH');
+        document.getElementById('display-date').textContent = new Date().toLocaleDateString('en-PH');
 
-        // Handle Image Upload
-        document.getElementById('item-image').addEventListener('change', function(event) {
-            const file = event.target.files[0];
-            const imgElement = document.getElementById('display-image');
+        // Main function to update the entire receipt
+        function updateReceipt() {
+            // Static Details
+            document.getElementById('display-biz-name').textContent = document.getElementById('biz-name').value;
+            document.getElementById('display-name').textContent = document.getElementById('customer-name').value || '-----';
+            document.getElementById('display-phone').textContent = document.getElementById('customer-phone').value || '-----';
+            
+            // Dynamic Items Setup
+            const itemRows = document.querySelectorAll('.item-row');
+            const receiptItemsList = document.getElementById('receipt-items-list');
+            receiptItemsList.innerHTML = ''; // Clear current list
+            let subtotal = 0;
+
+            // Loop through each input row
+            itemRows.forEach((row) => {
+                const desc = row.querySelector('.item-desc').value || '-----';
+                const qty = parseInt(row.querySelector('.item-qty').value) || 1;
+                const price = parseFloat(row.querySelector('.item-price').value) || 0;
+                const imgSrc = row.dataset.imgSrc;
+                const rowTotal = qty * price;
+
+                subtotal += rowTotal;
+
+                // Format Currency
+                const fPrice = price.toLocaleString('en-PH', {minimumFractionDigits: 2});
+                const fTotal = rowTotal.toLocaleString('en-PH', {minimumFractionDigits: 2});
+
+                // Build HTML for the receipt preview
+                const itemHtml = `
+                    <div class="receipt-item">
+                        ${imgSrc ? `<div class="mb-2 flex justify-start"><img src="${imgSrc}" class="w-20 h-20 object-cover rounded-md border border-pink-500 shadow-[0_0_8px_rgba(236,72,153,0.4)]"></div>` : ''}
+                        <div class="grid grid-cols-[1fr,2rem,5rem,6rem] gap-2 items-end text-right">
+                            <span class="text-left text-pink-100 truncate">${desc}</span>
+                            <span class="text-pink-100">${qty}</span>
+                            <span class="text-pink-100 whitespace-nowrap">₱${fPrice}</span>
+                            <span class="text-pink-300 whitespace-nowrap">₱${fTotal}</span>
+                        </div>
+                    </div>
+                `;
+                receiptItemsList.insertAdjacentHTML('beforeend', itemHtml);
+            });
+
+            // Calculate Totals
+            const shipping = parseFloat(document.getElementById('shipping-fee').value) || 0;
+            const grandTotal = subtotal + shipping;
+
+            // Update Totals on Receipt
+            document.getElementById('display-subtotal').textContent = '₱' + subtotal.toLocaleString('en-PH', {minimumFractionDigits: 2});
+            document.getElementById('display-shipping').textContent = '₱' + shipping.toLocaleString('en-PH', {minimumFractionDigits: 2});
+            document.getElementById('display-total').textContent = '₱' + grandTotal.toLocaleString('en-PH', {minimumFractionDigits: 2});
+        }
+
+        // --- Dynamic Row Management ---
+
+        // Function to create a new item input row (styled like image_0.png)
+        function addNewItem() {
+            const container = document.getElementById('items-container');
+            const row = document.createElement('div');
+            // Remove 'invisible' from the remove button for new rows
+            row.className = 'item-row bg-zinc-950/50 p-4 rounded-lg border border-pink-500/20 grid grid-cols-[1fr,5rem,auto,6rem,auto] gap-2 items-center';
+            row.innerHTML = `
+                <input type="text" placeholder="Item Name" class="item-desc w-full bg-zinc-900 border border-pink-500/50 text-pink-100 rounded-lg p-3 outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
+                <input type="number" value="1" min="1" class="item-qty w-full bg-zinc-900 border border-pink-500/50 text-pink-100 rounded-lg p-3 text-center outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
+                <label class="camera-button neon-border">
+                    <span class="text-xl">📷</span>
+                    <input type="file" accept="image/*" class="item-image hidden" onchange="handleImageUpload(this); updateReceipt();">
+                </label>
+                <input type="number" placeholder="Price" class="item-price w-full bg-zinc-900 border border-pink-500/50 text-pink-100 rounded-lg p-3 outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
+                <button onclick="removeItem(this)" class="remove-btn text-pink-600 hover:text-pink-400 font-bold px-2 py-1 rounded bg-zinc-900 border border-pink-600/50 text-xs transition-colors">X</button>
+            `;
+            container.appendChild(row);
+            updateReceipt();
+        }
+
+        // Logic for auto-popping a new row when user starts typing in the last row
+        function handleDynamicRow(input) {
+            const row = input.closest('.item-row');
+            const container = document.getElementById('items-container');
+            const rows = container.querySelectorAll('.item-row');
+
+            // If user types in the name input of the final row, add another empty row below it
+            if (input.value.trim() !== "" && row === rows[rows.length - 1]) {
+                addNewItem();
+            }
+        }
+
+        // Function to remove an item input row
+        function removeItem(button) {
+            const container = document.getElementById('items-container');
+            if(container.querySelectorAll('.item-row').length > 1) {
+                button.closest('.item-row').remove();
+                updateReceipt();
+            }
+        }
+
+        // Handle Image Upload sticker logic
+        function handleImageUpload(input) {
+            const file = input.files[0];
+            const label = input.closest('label');
+            const row = input.closest('.item-row');
             
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    imgElement.src = e.target.result;
-                    imgElement.classList.remove('hidden');
+                    row.dataset.imgSrc = e.target.result; // Store image data in the row
+                    label.classList.add('has-image'); // Turn button sticker solid pink
+                    label.querySelector('.text-xl').textContent = '✅'; // Change icon to checkmark
+                    updateReceipt();
                 }
                 reader.readAsDataURL(file);
             } else {
-                imgElement.classList.add('hidden');
-                imgElement.src = "";
+                row.dataset.imgSrc = "";
+                label.classList.remove('has-image');
+                label.querySelector('.text-xl').textContent = '📷';
+                updateReceipt();
             }
+        }
+
+        // --- PDF URL Removal Guide Button Logic ---
+        document.getElementById('url-tip-btn').addEventListener('click', function() {
+            const guides = {
+                'chrome': "Google Chrome: When the print window opens, click 'More settings', scroll down, and uncheck 'Headers and footers'.",
+                'safari_mac': "Safari (Mac): In the print dialog, ensure 'Print headers and footers' is unchecked.",
+                'safari_ios': "Safari (iOS): Tap the 'aA' icon in the address bar, choose 'Print', then tap 'Options' and turn off 'Headers & Footers'.",
+                'mobile': "Mobile Chrome: Most mobile browsers require checking advanced options in the system print dialog."
+            };
+            
+            // Check OS and Browser for specific guide (Basic detection)
+            let userGuide = guides['chrome']; // Default
+            if (navigator.userAgent.includes('Safari') && !navigator.userAgent.includes('Chrome')) {
+                if (navigator.userAgent.includes('Macintosh')) userGuide = guides['safari_mac'];
+                else if (navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad')) userGuide = guides['safari_ios'];
+            } else if (navigator.userAgent.includes('Android') || navigator.userAgent.includes('iPhone')) {
+                userGuide = guides['mobile'];
+            }
+
+            // Simple popup alert (from image_0.png guide)
+            alert(userGuide + "\n\nThis ensures a perfectly clean PDF digital bill.");
         });
 
-        // Update Text and Numbers
-        function updateReceipt() {
-            const bizName = document.getElementById('biz-name').value;
-            const name = document.getElementById('customer-name').value || '-----';
-            const phone = document.getElementById('customer-phone').value || '-----';
-            const itemDesc = document.getElementById('item-desc').value || '-----';
-            const price = parseFloat(document.getElementById('item-price').value) || 0;
-            const shipping = parseFloat(document.getElementById('shipping-fee').value) || 0;
-            const total = price + shipping;
-
-            // Update DOM Elements
-            document.getElementById('display-biz-name').textContent = bizName;
-            document.getElementById('display-name').textContent = name;
-            document.getElementById('display-phone').textContent = phone;
-            document.getElementById('display-item').textContent = itemDesc;
-            
-            // Number formatting
-            document.getElementById('display-price').textContent = '₱' + price.toLocaleString('en-PH', {minimumFractionDigits: 2});
-            document.getElementById('display-shipping').textContent = '₱' + shipping.toLocaleString('en-PH', {minimumFractionDigits: 2});
-            document.getElementById('display-total').textContent = '₱' + total.toLocaleString('en-PH', {minimumFractionDigits: 2});
-        }
+        // Run once on load to set up the default empty state
+        updateReceipt();
     </script>
 </body>
 </html>
