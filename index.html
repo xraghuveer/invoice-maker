@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FB Marketplace Receipt Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* This hides the input form when you click print/save to PDF */
+        @media print {
+            .no-print { display: none !important; }
+            body { background-color: white; margin: 0; padding: 0; }
+            #receipt-container { box-shadow: none; width: 100%; margin: 0; padding: 0; }
+        }
+        /* Paper receipt aesthetic */
+        .paper-font { font-family: 'Courier New', Courier, monospace; }
+        .dashed-line { border-bottom: 2px dashed #cbd5e1; margin: 12px 0; }
+    </style>
+</head>
+<body class="bg-slate-100 text-gray-800 font-sans p-4 pb-24 md:p-8">
+
+    <!-- Input Form Section -->
+    <div class="max-w-lg mx-auto bg-white rounded-2xl shadow-sm p-6 mb-8 no-print border border-slate-200">
+        <h2 class="text-2xl font-bold text-slate-800 mb-2">Create a Bill</h2>
+        <p class="text-sm text-slate-500 mb-6">Fill out the details below step-by-step.</p>
+
+        <div class="space-y-5">
+            <!-- Step 1 -->
+            <div>
+                <label class="block text-sm font-semibold mb-1">Step 1: Customer Name</label>
+                <input type="text" id="customer-name" placeholder="e.g., Juan Dela Cruz" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-3 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all" oninput="updateReceipt()">
+            </div>
+
+            <!-- Step 2 -->
+            <div>
+                <label class="block text-sm font-semibold mb-1">Step 2: Item Description</label>
+                <input type="text" id="item-desc" placeholder="e.g., Pre-loved Nike Shoes Size 9" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-3 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all" oninput="updateReceipt()">
+            </div>
+
+            <!-- Step 3 & 4 -->
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-semibold mb-1">Step 3: Item Price (₱)</label>
+                    <input type="number" id="item-price" placeholder="0" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-3 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all" oninput="updateReceipt()">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-1">Step 4: Delivery Fee (₱)</label>
+                    <input type="number" id="shipping-fee" placeholder="0" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-3 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all" oninput="updateReceipt()">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Receipt Preview Section -->
+    <div id="receipt-container" class="max-w-sm mx-auto bg-white shadow-md p-6 paper-font text-sm border-t-8 border-slate-800 relative">
+        <div class="text-center mb-6">
+            <h1 class="text-xl font-bold uppercase tracking-widest">Official Receipt</h1>
+            <p class="text-xs text-slate-500 mt-1">FB Marketplace Seller</p>
+        </div>
+
+        <div class="mb-4">
+            <div class="flex justify-between">
+                <span>Date:</span>
+                <span id="display-date" class="font-bold"></span>
+            </div>
+            <div class="flex justify-between mt-1">
+                <span>Billed To:</span>
+                <span id="display-name" class="font-bold">-----</span>
+            </div>
+        </div>
+
+        <div class="dashed-line"></div>
+
+        <div class="flex justify-between font-bold mb-2 uppercase text-xs">
+            <span>Description</span>
+            <span>Amount</span>
+        </div>
+        
+        <div class="flex justify-between mb-1">
+            <span id="display-item" class="pr-2">-----</span>
+            <span id="display-price">₱0.00</span>
+        </div>
+        
+        <div class="flex justify-between mb-1">
+            <span>Delivery/Shipping</span>
+            <span id="display-shipping">₱0.00</span>
+        </div>
+
+        <div class="dashed-line"></div>
+
+        <div class="flex justify-between items-center mt-4 mb-8">
+            <span class="font-bold uppercase tracking-wide">Total Due</span>
+            <span id="display-total" class="font-bold text-xl">₱0.00</span>
+        </div>
+
+        <div class="text-center text-xs text-slate-500 mt-8">
+            <p>Thank you for trusting our shop!</p>
+            <p>Please take a screenshot for your records.</p>
+        </div>
+    </div>
+
+    <!-- Sticky Print Button for Mobile -->
+    <div class="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 no-print flex justify-center shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+        <button onclick="window.print()" class="w-full max-w-lg bg-slate-800 text-white font-bold py-3 px-6 rounded-lg hover:bg-slate-700 active:scale-95 transition-all">
+            🖨️ Save as PDF / Print
+        </button>
+    </div>
+
+    <script>
+        // Set today's date automatically
+        const today = new Date();
+        document.getElementById('display-date').textContent = today.toLocaleDateString('en-PH');
+
+        // Function to update the receipt in real-time
+        function updateReceipt() {
+            const name = document.getElementById('customer-name').value || '-----';
+            const itemDesc = document.getElementById('item-desc').value || '-----';
+            const price = parseFloat(document.getElementById('item-price').value) || 0;
+            const shipping = parseFloat(document.getElementById('shipping-fee').value) || 0;
+            const total = price + shipping;
+
+            document.getElementById('display-name').textContent = name;
+            document.getElementById('display-item').textContent = itemDesc;
+            
+            // Format numbers to look like currency
+            document.getElementById('display-price').textContent = '₱' + price.toLocaleString('en-PH', {minimumFractionDigits: 2});
+            document.getElementById('display-shipping').textContent = '₱' + shipping.toLocaleString('en-PH', {minimumFractionDigits: 2});
+            document.getElementById('display-total').textContent = '₱' + total.toLocaleString('en-PH', {minimumFractionDigits: 2});
+        }
+    </script>
+</body>
+</html>
