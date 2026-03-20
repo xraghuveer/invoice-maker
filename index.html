@@ -36,7 +36,7 @@
         input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         input[type="number"] { -moz-appearance: textfield; }
 
-        /* Camera/Image Button Style - Now dynamically sized for its 10% space */
+        /* Camera/Image Button Style */
         .camera-button {
             display: flex;
             align-items: center;
@@ -113,26 +113,48 @@
             </div>
         </div>
 
-        <!-- Dynamic Products Section (50% / 20% / 20% / 10% Layout) -->
+        <!-- Dynamic Products Section -->
         <div>
             <label class="block text-sm font-receipt font-semibold mb-2 text-pink-300">Products</label>
-            <div id="items-container" class="space-y-4">
+            <div id="items-container" class="space-y-4 overflow-hidden">
                 
-                <!-- 5fr (50%), 2fr (20%), 2fr (20%), 1fr (10%), auto (remove btn) -->
-                <div class="item-row bg-zinc-950/50 p-3 rounded-lg border border-pink-500/20 grid grid-cols-[5fr_2fr_2fr_1fr_auto] gap-2 items-center">
+                <!-- NEW GRID RATIO: 8fr 2.5fr 1.5fr 1fr 0 -->
+                <div class="item-row bg-zinc-950/50 p-3 rounded-lg border border-pink-500/20 grid grid-cols-[8fr_2.5fr_1.5fr_1fr_0] gap-2 items-center">
                     
                     <input type="text" placeholder="Item Name" class="item-desc w-full min-w-0 bg-zinc-900 border border-pink-500/50 text-pink-100 rounded-lg p-2 outline-none focus:border-pink-500 transition-colors" oninput="handleDynamicRow(this); updateReceipt();">
                     
                     <input type="number" placeholder="Price" class="item-price w-full min-w-0 bg-zinc-900 border border-pink-500/50 text-pink-100 rounded-lg p-2 text-center outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
 
-                    <input type="number" value="1" min="1" class="item-qty w-full min-w-0 bg-zinc-900 border border-pink-500/50 text-pink-100 rounded-lg p-2 text-center outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
+                    <!-- Dropdown for Quantity with Neon Arrow -->
+                    <div class="relative w-full min-w-0">
+                        <select class="item-qty w-full bg-zinc-900 border border-pink-500/50 text-pink-100 rounded-lg p-2 appearance-none outline-none focus:border-pink-500 transition-colors cursor-pointer text-center pl-2 pr-5" onchange="updateReceipt()">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="9">9</option>
+                            <option value="10">10</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-1">
+                            <svg class="fill-current h-4 w-4 text-pink-500 drop-shadow-[0_0_3px_rgba(236,72,153,0.8)]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                            </svg>
+                        </div>
+                    </div>
                     
                     <label class="camera-button">
                         <span>+</span>
                         <input type="file" accept="image/*" class="item-image hidden" onchange="handleImageUpload(this); updateReceipt();">
                     </label>
                     
-                    <button onclick="removeItem(this)" class="remove-btn invisible text-pink-600 hover:text-pink-400 font-bold px-2 py-1 rounded bg-zinc-900 border border-pink-600/50 text-sm transition-colors">X</button>
+                    <!-- Remove button is technically squished by the '0' grid, overflow-hidden keeps it clean -->
+                    <div class="overflow-hidden w-full h-full flex items-center justify-center">
+                        <button onclick="removeItem(this)" class="remove-btn invisible text-pink-600 hover:text-pink-400 font-bold px-1 py-1 rounded bg-zinc-900 border border-pink-600/50 text-xs transition-colors whitespace-nowrap">X</button>
+                    </div>
                 </div>
 
             </div>
@@ -263,17 +285,39 @@
             const container = document.getElementById('items-container');
             const row = document.createElement('div');
             
-            // Updated class list with fractional grid constraints (5fr, 2fr, 2fr, 1fr)
-            row.className = 'item-row bg-zinc-950/50 p-3 rounded-lg border border-pink-500/20 grid grid-cols-[5fr_2fr_2fr_1fr_auto] gap-2 items-center';
+            row.className = 'item-row bg-zinc-950/50 p-3 rounded-lg border border-pink-500/20 grid grid-cols-[8fr_2.5fr_1.5fr_1fr_0] gap-2 items-center';
             row.innerHTML = `
                 <input type="text" placeholder="Item Name" class="item-desc w-full min-w-0 bg-zinc-900 border border-pink-500/50 text-pink-100 rounded-lg p-2 outline-none focus:border-pink-500 transition-colors" oninput="handleDynamicRow(this); updateReceipt();">
                 <input type="number" placeholder="Price" class="item-price w-full min-w-0 bg-zinc-900 border border-pink-500/50 text-pink-100 rounded-lg p-2 text-center outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
-                <input type="number" value="1" min="1" class="item-qty w-full min-w-0 bg-zinc-900 border border-pink-500/50 text-pink-100 rounded-lg p-2 text-center outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
+                
+                <div class="relative w-full min-w-0">
+                    <select class="item-qty w-full bg-zinc-900 border border-pink-500/50 text-pink-100 rounded-lg p-2 appearance-none outline-none focus:border-pink-500 transition-colors cursor-pointer text-center pl-2 pr-5" onchange="updateReceipt()">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-1">
+                        <svg class="fill-current h-4 w-4 text-pink-500 drop-shadow-[0_0_3px_rgba(236,72,153,0.8)]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                            <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                        </svg>
+                    </div>
+                </div>
+
                 <label class="camera-button">
                     <span>+</span>
                     <input type="file" accept="image/*" class="item-image hidden" onchange="handleImageUpload(this); updateReceipt();">
                 </label>
-                <button onclick="removeItem(this)" class="remove-btn text-pink-600 hover:text-pink-400 font-bold px-2 py-1 rounded bg-zinc-900 border border-pink-600/50 text-sm transition-colors">X</button>
+                
+                <div class="overflow-hidden w-full h-full flex items-center justify-center">
+                    <button onclick="removeItem(this)" class="remove-btn text-pink-600 hover:text-pink-400 font-bold px-1 py-1 rounded bg-zinc-900 border border-pink-600/50 text-xs transition-colors whitespace-nowrap">X</button>
+                </div>
             `;
             container.appendChild(row);
             updateReceipt();
