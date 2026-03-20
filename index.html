@@ -36,13 +36,16 @@
         input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         input[type="number"] { -moz-appearance: textfield; }
 
-        /* Camera/Image Button Style */
+        /* Camera/Image Button Style - Now dynamically sized for its 10% space */
         .camera-button {
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 2.5rem;
-            height: 2.5rem;
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            max-width: 3rem;
+            max-height: 3rem;
+            margin: 0 auto;
             border-radius: 0.5rem;
             background-color: var(--neon-pink);
             color: white;
@@ -74,26 +77,26 @@
         <p class="text-sm text-pink-300 font-receipt">Acknowledgement Receipt</p>
     </div>
 
-    <!-- MAIN FORM -->
-    <div class="max-w-xl mx-auto bg-zinc-900 border border-pink-500/30 rounded-2xl p-6 mb-8 no-print neon-border">
-        
-        <!-- Separated Choose Store Section with Neon Arrow -->
-        <div class="mb-6 relative">
-            <label class="block text-sm font-receipt font-semibold mb-2 text-pink-300">Choose Store</label>
-            <div class="relative">
-                <select id="biz-name" class="w-full bg-zinc-950 border border-pink-500/50 text-pink-100 font-receipt rounded-lg p-3 appearance-none outline-none focus:border-pink-500 transition-colors cursor-pointer" onchange="updateReceipt()">
-                    <option value="Elena's Fine Goods">Elena's Fine Goods</option>
-                    <option value="Han Han">Han Han</option>
-                </select>
-                <!-- Custom Neon Pink Arrow -->
-                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
-                    <svg class="fill-current h-5 w-5 text-pink-500 drop-shadow-[0_0_5px_rgba(236,72,153,0.8)]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                        <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
-                    </svg>
-                </div>
+    <!-- SEPARATE STORE SELECTION CONTAINER -->
+    <div class="max-w-xl mx-auto bg-zinc-900 border border-pink-500/30 rounded-2xl p-6 mb-6 no-print neon-border relative">
+        <label class="block text-sm font-receipt font-semibold mb-2 text-pink-300">Choose Store</label>
+        <div class="relative">
+            <select id="biz-name" class="w-full bg-zinc-950 border border-pink-500/50 text-pink-100 font-receipt rounded-lg p-3 appearance-none outline-none focus:border-pink-500 transition-colors cursor-pointer" onchange="updateReceipt()">
+                <option value="Elena's Fine Goods">Elena's Fine Goods</option>
+                <option value="Han Han">Han Han</option>
+            </select>
+            <!-- Neon Pink Arrow -->
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
+                <svg class="fill-current h-5 w-5 text-pink-500 drop-shadow-[0_0_5px_rgba(236,72,153,0.8)]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                    <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                </svg>
             </div>
         </div>
+    </div>
 
+    <!-- MAIN FORM (Customer & Products) -->
+    <div class="max-w-xl mx-auto bg-zinc-900 border border-pink-500/30 rounded-2xl p-6 mb-8 no-print neon-border">
+        
         <!-- Customer & Delivery Grid -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
             <div>
@@ -110,18 +113,19 @@
             </div>
         </div>
 
-        <!-- Dynamic Products Section (Improved Spacing) -->
+        <!-- Dynamic Products Section (50% / 20% / 20% / 10% Layout) -->
         <div>
             <label class="block text-sm font-receipt font-semibold mb-2 text-pink-300">Products</label>
             <div id="items-container" class="space-y-4">
                 
-                <div class="item-row bg-zinc-950/50 p-4 rounded-lg border border-pink-500/20 grid grid-cols-[1fr,5rem,4rem,2.5rem,auto] gap-3 items-center">
+                <!-- 5fr (50%), 2fr (20%), 2fr (20%), 1fr (10%), auto (remove btn) -->
+                <div class="item-row bg-zinc-950/50 p-3 rounded-lg border border-pink-500/20 grid grid-cols-[5fr_2fr_2fr_1fr_auto] gap-2 items-center">
                     
-                    <input type="text" placeholder="Item Name" class="item-desc w-full bg-zinc-900 border border-pink-500/50 text-pink-100 rounded-lg p-2 outline-none focus:border-pink-500 transition-colors" oninput="handleDynamicRow(this); updateReceipt();">
+                    <input type="text" placeholder="Item Name" class="item-desc w-full min-w-0 bg-zinc-900 border border-pink-500/50 text-pink-100 rounded-lg p-2 outline-none focus:border-pink-500 transition-colors" oninput="handleDynamicRow(this); updateReceipt();">
                     
-                    <input type="number" placeholder="Price" class="item-price w-full bg-zinc-900 border border-pink-500/50 text-pink-100 rounded-lg p-2 text-center outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
+                    <input type="number" placeholder="Price" class="item-price w-full min-w-0 bg-zinc-900 border border-pink-500/50 text-pink-100 rounded-lg p-2 text-center outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
 
-                    <input type="number" value="1" min="1" class="item-qty w-full bg-zinc-900 border border-pink-500/50 text-pink-100 rounded-lg p-2 text-center outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
+                    <input type="number" value="1" min="1" class="item-qty w-full min-w-0 bg-zinc-900 border border-pink-500/50 text-pink-100 rounded-lg p-2 text-center outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
                     
                     <label class="camera-button">
                         <span>+</span>
@@ -139,9 +143,7 @@
     <div id="receipt-container" class="max-w-md mx-auto bg-zinc-950 border-2 border-pink-500 shadow-[0_0_20px_rgba(236,72,153,0.3)] p-8 font-receipt text-base text-pink-100 relative rounded-md">
         
         <div class="text-center mb-8">
-            <!-- Adjusted leading/line-height to fix overlap -->
             <h1 id="display-biz-name" class="text-4xl font-bold tracking-widest text-pink-400 neon-text font-header mb-1 leading-none">Elena's Fine Goods</h1>
-            <!-- Scaled down the subtext -->
             <p class="text-[10px] text-pink-300/70 uppercase tracking-widest mt-1">Acknowledgement Receipt</p>
         </div>
 
@@ -198,7 +200,7 @@
         </div>
     </div>
 
-    <!-- ACTION BUTTONS (SHRUNK DOWN) -->
+    <!-- ACTION BUTTONS -->
     <div class="fixed bottom-0 left-0 right-0 p-3 bg-zinc-950/90 backdrop-blur-sm border-t border-pink-500/30 no-print flex flex-col items-center gap-2 z-50">
         
         <button id="url-tip-btn" class="bg-zinc-800 text-pink-300 text-xs px-4 py-1.5 rounded-full border border-pink-500/30 font-receipt hover:bg-pink-900 transition-colors cursor-help">
@@ -261,12 +263,12 @@
             const container = document.getElementById('items-container');
             const row = document.createElement('div');
             
-            // Adjusted classes in the new item row to match the updated spacing
-            row.className = 'item-row bg-zinc-950/50 p-4 rounded-lg border border-pink-500/20 grid grid-cols-[1fr,5rem,4rem,2.5rem,auto] gap-3 items-center';
+            // Updated class list with fractional grid constraints (5fr, 2fr, 2fr, 1fr)
+            row.className = 'item-row bg-zinc-950/50 p-3 rounded-lg border border-pink-500/20 grid grid-cols-[5fr_2fr_2fr_1fr_auto] gap-2 items-center';
             row.innerHTML = `
-                <input type="text" placeholder="Item Name" class="item-desc w-full bg-zinc-900 border border-pink-500/50 text-pink-100 rounded-lg p-2 outline-none focus:border-pink-500 transition-colors" oninput="handleDynamicRow(this); updateReceipt();">
-                <input type="number" placeholder="Price" class="item-price w-full bg-zinc-900 border border-pink-500/50 text-pink-100 rounded-lg p-2 text-center outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
-                <input type="number" value="1" min="1" class="item-qty w-full bg-zinc-900 border border-pink-500/50 text-pink-100 rounded-lg p-2 text-center outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
+                <input type="text" placeholder="Item Name" class="item-desc w-full min-w-0 bg-zinc-900 border border-pink-500/50 text-pink-100 rounded-lg p-2 outline-none focus:border-pink-500 transition-colors" oninput="handleDynamicRow(this); updateReceipt();">
+                <input type="number" placeholder="Price" class="item-price w-full min-w-0 bg-zinc-900 border border-pink-500/50 text-pink-100 rounded-lg p-2 text-center outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
+                <input type="number" value="1" min="1" class="item-qty w-full min-w-0 bg-zinc-900 border border-pink-500/50 text-pink-100 rounded-lg p-2 text-center outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
                 <label class="camera-button">
                     <span>+</span>
                     <input type="file" accept="image/*" class="item-image hidden" onchange="handleImageUpload(this); updateReceipt();">
