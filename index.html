@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kitty Invoice Maker</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -66,37 +67,21 @@
         .dark .camera-button:active { box-shadow: 0 0 15px var(--neon-pink); }
         .camera-button.has-image { background-color: #be185d; }
 
-        /* PRINT SETTINGS - Scales to A4 & Forces Layout Reset for Print */
+        /* Print Settings Fallback */
         @media print {
             .no-print { display: none !important; }
-            html, body { height: 100%; margin: 0 !important; padding: 0 !important; background: white !important; }
+            body { background-color: white !important; }
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-            
-            #receipt-container { 
-                margin: 10mm auto !important; 
-                width: calc(100% - 20mm) !important; 
-                max-width: none !important;
-                min-height: calc(100vh - 20mm) !important; 
-                box-shadow: none !important; 
-                border: 2px solid #ec4899 !important; 
-                border-radius: 12px !important; 
-                padding: 8% 10% !important; 
-                box-sizing: border-box !important;
-            }
-
-            #receipt-container { font-size: 1.25rem !important; }
-            #receipt-container .text-sm { font-size: 1.15rem !important; }
-            #receipt-container .text-xs { font-size: 1rem !important; }
-            #receipt-container h1.text-4xl { font-size: 3.5rem !important; }
-            #receipt-container .text-\\[7px\\] { font-size: 0.75rem !important; }
-            #receipt-container .text-2xl { font-size: 2.2rem !important; }
-
+            #receipt-container { margin: 0 auto; width: 100%; box-shadow: none; border: none; }
             .receipt-item { page-break-inside: avoid; }
         }
-        @page { size: A4 portrait; margin: 0mm; }
+        @page { size: auto; margin: 0mm; }
+        
+        /* Hide UI elements during image capture */
+        .capturing .no-print { display: none !important; }
     </style>
 </head>
-<body class="p-4 pb-32 md:p-8 min-h-screen selection:bg-pink-500 selection:text-white bg-slate-50 dark:bg-[#09090b] text-slate-800 dark:text-[#fee2e2] transition-colors duration-300">
+<body class="p-4 pb-12 md:p-8 min-h-screen selection:bg-pink-500 selection:text-white bg-slate-50 dark:bg-[#09090b] text-slate-800 dark:text-[#fee2e2] transition-colors duration-300">
 
     <button onclick="toggleTheme()" class="fixed top-4 right-4 z-50 no-print bg-white dark:bg-zinc-800 text-2xl p-3 rounded-full border border-pink-300 dark:border-pink-500/30 shadow-md transition-transform hover:scale-110">
         <span id="theme-icon">☀️</span>
@@ -107,11 +92,11 @@
         <p class="text-sm text-pink-600 dark:text-pink-300 font-receipt">Acknowledgement Receipt</p>
     </div>
 
-    <div class="max-w-7xl mx-auto lg:flex lg:gap-10 items-start print:block">
+    <div class="max-w-7xl mx-auto lg:flex lg:gap-10 items-start">
         
-        <div class="flex-1 w-full max-w-2xl mx-auto lg:max-w-none space-y-6 print:hidden">
+        <div class="flex-1 w-full max-w-2xl mx-auto lg:max-w-none space-y-6 no-print">
             
-            <div class="bg-white dark:bg-zinc-900 border border-pink-300 dark:border-pink-500/30 rounded-2xl p-6 no-print neon-border relative transition-colors duration-300">
+            <div class="bg-white dark:bg-zinc-900 border border-pink-300 dark:border-pink-500/30 rounded-2xl p-6 neon-border relative transition-colors duration-300">
                 <label class="block text-sm font-receipt font-semibold mb-2 text-pink-600 dark:text-pink-300">Choose Store</label>
                 <div class="relative">
                     <select id="biz-name" class="w-full bg-slate-50 dark:bg-zinc-950 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 font-receipt rounded-lg p-3 appearance-none outline-none focus:border-pink-500 transition-colors cursor-pointer" onchange="updateReceipt()">
@@ -126,7 +111,7 @@
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-zinc-900 border border-pink-300 dark:border-pink-500/30 rounded-2xl p-6 no-print neon-border transition-colors duration-300">
+            <div class="bg-white dark:bg-zinc-900 border border-pink-300 dark:border-pink-500/30 rounded-2xl p-6 neon-border transition-colors duration-300">
                 
                 <div class="grid grid-cols-2 gap-4 mb-4">
                     <div>
@@ -165,7 +150,7 @@
                     <input type="text" id="trans-id" placeholder="Transaction No." class="w-full bg-slate-50 dark:bg-zinc-950 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 rounded-lg p-3 outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
                 </div>
 
-                <div class="dashed-line no-print mb-6"></div>
+                <div class="dashed-line mb-6"></div>
 
                 <div>
                     <div class="flex justify-between items-end mb-2">
@@ -186,25 +171,7 @@
                             <input type="text" placeholder="Item Name" class="item-desc w-full min-w-0 bg-white dark:bg-zinc-900 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 rounded-lg p-2 outline-none focus:border-pink-500 transition-colors" oninput="handleDynamicRow(this); updateReceipt();">
                             <input type="number" placeholder="Price" class="item-price w-full min-w-0 bg-white dark:bg-zinc-900 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 rounded-lg p-2 text-center outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
                             
-                            <div class="relative w-full min-w-0">
-                                <select class="item-qty w-full bg-white dark:bg-zinc-900 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 rounded-lg p-2 appearance-none outline-none focus:border-pink-500 transition-colors cursor-pointer text-center pl-2 pr-4" onchange="updateReceipt()">
-                                    <option value="1">1</option>
-                                    <option value="2">2</option>
-                                    <option value="3">3</option>
-                                    <option value="4">4</option>
-                                    <option value="5">5</option>
-                                    <option value="6">6</option>
-                                    <option value="7">7</option>
-                                    <option value="8">8</option>
-                                    <option value="9">9</option>
-                                    <option value="10">10</option>
-                                </select>
-                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-1">
-                                    <svg class="fill-current h-3 w-3 text-pink-500 drop-shadow-sm dark:drop-shadow-[0_0_3px_rgba(236,72,153,0.8)]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                        <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
-                                    </svg>
-                                </div>
-                            </div>
+                            <input type="number" list="qty-list" placeholder="Qty" value="1" class="item-qty w-full min-w-0 bg-white dark:bg-zinc-900 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 rounded-lg p-2 text-center outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
 
                             <input type="number" placeholder="Disc" class="item-disc w-full min-w-0 bg-white dark:bg-zinc-900 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 rounded-lg p-2 text-center outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
 
@@ -221,12 +188,12 @@
             </div>
         </div>
 
-        <div class="w-full max-w-md mx-auto mt-10 lg:mt-0 lg:w-[480px] lg:flex-shrink-0 lg:sticky lg:top-8 print:w-full print:max-w-none print:block">
-            <div id="receipt-container" class="flex flex-col min-h-[650px] bg-white dark:bg-zinc-950 border-2 border-pink-400 dark:border-pink-500 shadow-xl dark:shadow-[0_0_20px_rgba(236,72,153,0.3)] p-8 font-receipt text-base text-slate-800 dark:text-pink-100 relative rounded-md transition-colors duration-300">
+        <div class="w-full max-w-md mx-auto mt-10 lg:mt-0 lg:w-[480px] lg:flex-shrink-0 lg:sticky lg:top-8">
+            <div id="receipt-container" class="flex flex-col h-fit bg-white dark:bg-zinc-950 border-2 border-pink-400 dark:border-pink-500 shadow-xl dark:shadow-[0_0_20px_rgba(236,72,153,0.3)] p-8 font-receipt text-base text-slate-800 dark:text-pink-100 relative rounded-md transition-colors duration-300">
                 
                 <div>
                     <div class="text-center mb-8">
-                        <h1 id="display-biz-name" class="text-4xl font-bold tracking-widest text-pink-500 neon-text font-header mb-1 leading-none">Elena's Fine Goods</h1>
+                        <h1 id="display-biz-name" class="text-4xl font-bold tracking-widest text-pink-400 neon-text font-header mb-1 leading-none">Elena's Fine Goods</h1>
                         <p class="text-[7px] text-pink-600 dark:text-pink-300/70 uppercase tracking-widest mt-1">Acknowledgement Receipt</p>
                     </div>
 
@@ -291,24 +258,38 @@
                     </div>
                 </div>
 
-                <div class="text-center mt-auto pt-10">
+                <div class="text-center mt-10">
                     <p class="text-2xl text-pink-600 dark:text-pink-400/80 font-note">Thank you for your purchase!</p>
                     <p class="text-xs text-pink-500 dark:text-pink-500/50 mt-3 font-receipt tracking-widest">✧ KITTY INVOICE MAKER ✧</p>
                 </div>
             </div>
+
+            <div class="flex justify-center items-center gap-6 mt-6 no-print">
+                <button id="btn-save" onclick="downloadImage()" class="flex items-center justify-center w-16 h-16 bg-pink-600 text-white rounded-full shadow-[0_0_15px_rgba(236,72,153,0.5)] hover:bg-pink-500 hover:scale-110 active:scale-95 transition-all outline-none" title="Save Image">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                </button>
+                <button id="btn-share" onclick="shareImage()" class="flex items-center justify-center w-16 h-16 bg-pink-600 text-white rounded-full shadow-[0_0_15px_rgba(236,72,153,0.5)] hover:bg-pink-500 hover:scale-110 active:scale-95 transition-all outline-none" title="Share Image">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                    </svg>
+                </button>
+            </div>
+
         </div>
     </div>
 
-    <div class="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-sm border-t border-pink-300 dark:border-pink-500/30 no-print z-40 transition-colors duration-300">
-        <div class="max-w-7xl mx-auto p-4 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <button id="url-tip-btn" class="bg-slate-100 dark:bg-zinc-800 text-pink-600 dark:text-pink-300 text-sm px-6 py-3 rounded-full border border-pink-300 dark:border-pink-500/30 font-receipt hover:bg-slate-200 dark:hover:bg-pink-900 transition-colors cursor-help">
-                How to Remove Page Link from PDF?
-            </button>
-            <button onclick="window.print()" class="w-full sm:w-96 bg-pink-600 hover:bg-pink-500 text-white font-bold py-4 px-6 rounded-xl shadow-lg dark:shadow-[0_0_10px_rgba(236,72,153,0.5)] active:scale-95 transition-all text-lg tracking-wide uppercase font-receipt">
-                ⚡ Save Digital Bill
-            </button>
-        </div>
-    </div>
+    <script>
+        const qtyList = document.createElement('datalist');
+        qtyList.id = 'qty-list';
+        for (let i = 1; i <= 100; i++) {
+            const opt = document.createElement('option');
+            opt.value = i;
+            qtyList.appendChild(opt);
+        }
+        document.body.appendChild(qtyList);
+    </script>
 
     <script>
         document.getElementById('display-date').textContent = new Date().toLocaleDateString('en-PH');
@@ -420,25 +401,7 @@
                 <input type="text" placeholder="Item Name" class="item-desc w-full min-w-0 bg-white dark:bg-zinc-900 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 rounded-lg p-2 outline-none focus:border-pink-500 transition-colors" oninput="handleDynamicRow(this); updateReceipt();">
                 <input type="number" placeholder="Price" class="item-price w-full min-w-0 bg-white dark:bg-zinc-900 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 rounded-lg p-2 text-center outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
                 
-                <div class="relative w-full min-w-0">
-                    <select class="item-qty w-full bg-white dark:bg-zinc-900 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 rounded-lg p-2 appearance-none outline-none focus:border-pink-500 transition-colors cursor-pointer text-center pl-2 pr-4" onchange="updateReceipt()">
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                        <option value="5">5</option>
-                        <option value="6">6</option>
-                        <option value="7">7</option>
-                        <option value="8">8</option>
-                        <option value="9">9</option>
-                        <option value="10">10</option>
-                    </select>
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-1">
-                        <svg class="fill-current h-3 w-3 text-pink-500 drop-shadow-sm dark:drop-shadow-[0_0_3px_rgba(236,72,153,0.8)]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                            <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
-                        </svg>
-                    </div>
-                </div>
+                <input type="number" list="qty-list" placeholder="Qty" value="1" class="item-qty w-full min-w-0 bg-white dark:bg-zinc-900 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 rounded-lg p-2 text-center outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
 
                 <input type="number" placeholder="Disc" class="item-disc w-full min-w-0 bg-white dark:bg-zinc-900 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 rounded-lg p-2 text-center outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
 
@@ -495,24 +458,74 @@
             }
         }
 
-        document.getElementById('url-tip-btn').addEventListener('click', function() {
-            const guides = {
-                'chrome': "Google Chrome: When the print window opens, click 'More settings', scroll down, and uncheck 'Headers and footers'.",
-                'safari_mac': "Safari (Mac): In the print dialog, ensure 'Print headers and footers' is unchecked.",
-                'safari_ios': "Safari (iOS): Tap the 'aA' icon in the address bar, choose 'Print', then tap 'Options' and turn off 'Headers & Footers'.",
-                'mobile': "Mobile Browsers: Look for 'More Options' or 'Advanced' in your print preview and uncheck 'Headers/Footers' or 'Page Info'."
-            };
+        // --- IMAGE CAPTURE AND SHARE LOGIC ---
+        
+        async function captureReceipt() {
+            const container = document.getElementById('receipt-container');
+            document.body.classList.add('capturing');
             
-            let userGuide = guides['chrome'];
-            if (navigator.userAgent.includes('Safari') && !navigator.userAgent.includes('Chrome')) {
-                if (navigator.userAgent.includes('Macintosh')) userGuide = guides['safari_mac'];
-                else if (navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad')) userGuide = guides['safari_ios'];
-            } else if (navigator.userAgent.includes('Android') || navigator.userAgent.includes('iPhone')) {
-                userGuide = guides['mobile'];
-            }
+            const isDark = document.documentElement.classList.contains('dark');
+            const canvas = await html2canvas(container, {
+                scale: 2, 
+                useCORS: true, 
+                backgroundColor: isDark ? '#09090b' : '#ffffff' 
+            });
+            
+            document.body.classList.remove('capturing');
+            return canvas;
+        }
 
-            alert(userGuide + "\n\nThis ensures a perfectly clean digital bill without website links at the top/bottom.");
-        });
+        async function downloadImage() {
+            const btn = document.getElementById('btn-save');
+            btn.style.opacity = '0.5';
+            btn.style.pointerEvents = 'none';
+            
+            try {
+                const canvas = await captureReceipt();
+                const link = document.createElement('a');
+                const customerName = document.getElementById('customer-name').value.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'Customer';
+                link.download = `Invoice_${customerName}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            } catch (e) {
+                alert('Oops! Something went wrong saving the image.');
+                console.error(e);
+            }
+            
+            btn.style.opacity = '1';
+            btn.style.pointerEvents = 'auto';
+        }
+
+        async function shareImage() {
+            const btn = document.getElementById('btn-share');
+            btn.style.opacity = '0.5';
+            btn.style.pointerEvents = 'none';
+            
+            try {
+                const canvas = await captureReceipt();
+                canvas.toBlob(async (blob) => {
+                    const file = new File([blob], 'invoice.png', { type: 'image/png' });
+                    
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        await navigator.share({
+                            title: 'Kitty Invoice',
+                            text: 'Here is your receipt! Thank you for your purchase.',
+                            files: [file]
+                        });
+                    } else {
+                        alert('Direct sharing is not supported on this device/browser. Please use the "Save Pic" button and attach it in Messenger!');
+                    }
+                    
+                    btn.style.opacity = '1';
+                    btn.style.pointerEvents = 'auto';
+                }, 'image/png');
+            } catch (e) {
+                alert('Oops! Something went wrong while trying to share.');
+                console.error(e);
+                btn.style.opacity = '1';
+                btn.style.pointerEvents = 'auto';
+            }
+        }
 
         updateReceipt();
     </script>
