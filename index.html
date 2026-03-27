@@ -359,7 +359,6 @@
                 const fTotal = finalRowTotal.toLocaleString('en-PH', {minimumFractionDigits: 2});
                 const fDisc = discAmt.toLocaleString('en-PH', {minimumFractionDigits: 2});
 
-                // Template modified: removed 'truncate', added 'break-words', 'whitespace-normal', and 'overflow-visible'
                 const itemHtml = `
                     <div class="receipt-item mb-2 overflow-visible">
                         ${imgSrc ? `<div class="mb-2 flex justify-start"><img src="${imgSrc}" class="w-24 h-24 object-cover rounded-md border border-pink-400 dark:border-pink-500 shadow-sm dark:shadow-[0_0_8px_rgba(236,72,153,0.4)]"></div>` : ''}
@@ -456,7 +455,7 @@
             }
         }
 
-        // --- IMAGE CAPTURE LOGIC (HD Upgraded) ---
+        // --- IMAGE CAPTURE LOGIC (Scale 15) ---
         
         async function captureReceipt() {
             const container = document.getElementById('receipt-container');
@@ -464,8 +463,7 @@
             
             const isDark = document.documentElement.classList.contains('dark');
             const canvas = await html2canvas(container, {
-                // scale upgraded to 6 for maximum definition while remaining stable
-                scale: 6, 
+                scale: 15, 
                 useCORS: true, 
                 backgroundColor: isDark ? '#09090b' : '#ffffff' 
             });
@@ -489,10 +487,10 @@
             } catch (e) {
                 alert('Oops! Something went wrong saving the image.');
                 console.error(e);
+            } finally {
+                btn.style.opacity = '1';
+                btn.style.pointerEvents = 'auto';
             }
-            
-            btn.style.opacity = '1';
-            btn.style.pointerEvents = 'auto';
         }
 
         async function shareImage() {
@@ -502,25 +500,28 @@
             
             try {
                 const canvas = await captureReceipt();
-                canvas.toBlob(async (blob) => {
-                    const file = new File([blob], 'invoice.png', { type: 'image/png' });
-                    
-                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                        await navigator.share({
-                            title: 'Kitty Invoice',
-                            text: 'Here is your receipt! Thank you for your purchase.',
-                            files: [file]
-                        });
-                    } else {
-                        alert('Direct sharing is not supported on this device/browser. Please use the "Save Pic" button and attach it in Messenger!');
-                    }
-                    
-                    btn.style.opacity = '1';
-                    btn.style.pointerEvents = 'auto';
-                }, 'image/png');
+                // Await the blob conversion properly so finally block works correctly
+                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+                
+                const file = new File([blob], 'invoice.png', { type: 'image/png' });
+                
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        title: 'Kitty Invoice',
+                        text: 'Here is your receipt! Thank you for your purchase.',
+                        files: [file]
+                    });
+                } else {
+                    alert('Direct sharing is not supported on this device/browser. Please use the "Save Pic" button and attach it in Messenger!');
+                }
             } catch (e) {
-                alert('Oops! Something went wrong while trying to share.');
-                console.error(e);
+                // Ignore the AbortError which just means the user hit 'cancel' on the share dialog
+                if (e.name !== 'AbortError') {
+                    alert('Oops! Something went wrong while trying to share.');
+                    console.error(e);
+                }
+            } finally {
+                // ALWAYS unlock the button, no matter what happens!
                 btn.style.opacity = '1';
                 btn.style.pointerEvents = 'auto';
             }
