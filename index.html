@@ -1,10 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kitty Invoice Maker</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
     <style>
         /* Import Custom Fonts */
         @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Pacifico&display=swap');
@@ -15,20 +20,20 @@
         :root {
             --neon-pink: #ec4899;
             --neon-pink-dim: rgba(236, 72, 153, 0.4);
-            --dark-bg: #09090b;
         }
         
-        /* SCALES EVERYTHING DOWN BY 20% */
+        /* SCALES EVERYTHING DOWN BY 20% FOR MOBILE VIEW */
         html { font-size: 80%; } 
         
-        body { font-family: 'Inter', sans-serif; background-color: var(--dark-bg); color: #fee2e2; }
+        body { font-family: 'Inter', sans-serif; }
         .font-header { font-family: 'Pacifico', cursive; }
         .font-receipt { font-family: 'JetBrains Mono', monospace; }
         .font-note { font-family: 'Indie Flower', cursive; }
 
         /* Neon & Styled Elements */
-        .neon-text { text-shadow: 0 0 5px var(--neon-pink), 0 0 15px var(--neon-pink); }
-        .neon-border { box-shadow: 0 0 10px var(--neon-pink-dim), inset 0 0 5px rgba(236, 72, 153, 0.3); }
+        .dark .neon-text { text-shadow: 0 0 5px var(--neon-pink), 0 0 15px var(--neon-pink); }
+        .neon-border { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); } 
+        .dark .neon-border { box-shadow: 0 0 10px var(--neon-pink-dim), inset 0 0 5px rgba(236, 72, 153, 0.2); }
         .dashed-line { border-bottom: 2px dashed var(--neon-pink); margin: 12px 0; opacity: 0.5; }
         
         /* Input Overrides */
@@ -53,81 +58,135 @@
             font-weight: bold;
             line-height: 1;
             cursor: pointer;
-            box-shadow: 0 0 8px var(--neon-pink-dim);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
             transition: transform 0.1s, box-shadow 0.1s, background-color 0.2s;
         }
-        .camera-button:active { transform: scale(0.95); box-shadow: 0 0 15px var(--neon-pink); }
+        .camera-button:active { transform: scale(0.95); box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .dark .camera-button { box-shadow: 0 0 8px var(--neon-pink-dim); }
+        .dark .camera-button:active { box-shadow: 0 0 15px var(--neon-pink); }
         .camera-button.has-image { background-color: #be185d; }
 
-        /* Print Settings */
+        /* PRINT SETTINGS - Scales to A4 & Adds Border/Gap */
         @media print {
             .no-print { display: none !important; }
-            body { background-color: #09090b !important; margin: 0; padding: 0; }
+            html, body { height: 100%; margin: 0 !important; padding: 0 !important; }
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-            #receipt-container { margin: 0 auto; width: 100%; box-shadow: none; border: none; }
+            
+            #receipt-container { 
+                margin: 10mm auto !important; /* Creates the gap around the entire border */
+                width: calc(100% - 20mm) !important; 
+                max-width: none !important;
+                min-height: calc(100vh - 20mm) !important; /* Stretches to fill A4 Height perfectly */
+                box-shadow: none !important; 
+                border: 2px solid #ec4899 !important; /* Thin pink border */
+                border-radius: 12px !important; /* Smooth corners for the frame */
+                padding: 8% 10% !important; /* Inner spacing */
+                box-sizing: border-box !important;
+            }
+
+            /* Dynamically scales text up for the wider/taller A4 Page */
+            #receipt-container { font-size: 1.25rem !important; }
+            #receipt-container .text-sm { font-size: 1.15rem !important; }
+            #receipt-container .text-xs { font-size: 1rem !important; }
+            #receipt-container h1.text-4xl { font-size: 3.5rem !important; }
+            #receipt-container .text-\\[7px\\] { font-size: 0.75rem !important; }
+            #receipt-container .text-2xl { font-size: 2.2rem !important; }
+
             .receipt-item { page-break-inside: avoid; }
         }
-        @page { size: auto; margin: 0mm; }
+        /* Forces A4 PDF generation */
+        @page { size: A4 portrait; margin: 0mm; }
     </style>
 </head>
-<body class="p-4 pb-32 md:p-8 min-h-screen selection:bg-pink-500 selection:text-white">
+<body class="p-4 pb-32 md:p-8 min-h-screen selection:bg-pink-500 selection:text-white bg-slate-50 dark:bg-[#09090b] text-slate-800 dark:text-[#fee2e2] transition-colors duration-300">
+
+    <button onclick="toggleTheme()" class="fixed top-4 right-4 z-50 no-print bg-white dark:bg-zinc-800 text-2xl p-3 rounded-full border border-pink-300 dark:border-pink-500/30 shadow-md transition-transform hover:scale-110">
+        <span id="theme-icon">☀️</span>
+    </button>
 
     <div class="max-w-xl mx-auto text-center mb-6 no-print">
         <h1 class="text-5xl text-pink-500 tracking-wider neon-text font-header mt-4 mb-2">Kitty Invoice Maker</h1>
-        <p class="text-sm text-pink-300 font-receipt">Acknowledgement Receipt</p>
+        <p class="text-sm text-pink-600 dark:text-pink-300 font-receipt">Acknowledgement Receipt</p>
     </div>
 
-    <!-- SEPARATE STORE SELECTION CONTAINER -->
-    <div class="max-w-xl mx-auto bg-zinc-900 border border-pink-500/30 rounded-2xl p-6 mb-6 no-print neon-border relative">
-        <label class="block text-sm font-receipt font-semibold mb-2 text-pink-300">Choose Store</label>
+    <div class="max-w-xl mx-auto bg-white dark:bg-zinc-900 border border-pink-300 dark:border-pink-500/30 rounded-2xl p-6 mb-6 no-print neon-border relative transition-colors duration-300">
+        <label class="block text-sm font-receipt font-semibold mb-2 text-pink-600 dark:text-pink-300">Choose Store</label>
         <div class="relative">
-            <select id="biz-name" class="w-full bg-zinc-950 border border-pink-500/50 text-pink-100 font-receipt rounded-lg p-3 appearance-none outline-none focus:border-pink-500 transition-colors cursor-pointer" onchange="updateReceipt()">
+            <select id="biz-name" class="w-full bg-slate-50 dark:bg-zinc-950 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 font-receipt rounded-lg p-3 appearance-none outline-none focus:border-pink-500 transition-colors cursor-pointer" onchange="updateReceipt()">
                 <option value="Elena's Fine Goods">Elena's Fine Goods</option>
                 <option value="Han Han">Han Han</option>
             </select>
-            <!-- Neon Pink Arrow -->
             <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
-                <svg class="fill-current h-5 w-5 text-pink-500 drop-shadow-[0_0_5px_rgba(236,72,153,0.8)]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                <svg class="fill-current h-5 w-5 text-pink-500 drop-shadow-sm dark:drop-shadow-[0_0_5px_rgba(236,72,153,0.8)]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                     <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
                 </svg>
             </div>
         </div>
     </div>
 
-    <!-- MAIN FORM (Customer & Products) -->
-    <div class="max-w-xl mx-auto bg-zinc-900 border border-pink-500/30 rounded-2xl p-6 mb-8 no-print neon-border">
+    <div class="max-w-xl mx-auto bg-white dark:bg-zinc-900 border border-pink-300 dark:border-pink-500/30 rounded-2xl p-6 mb-8 no-print neon-border transition-colors duration-300">
         
-        <!-- Customer & Delivery Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
+        <div class="grid grid-cols-2 gap-4 mb-4">
             <div>
-                <label class="block text-sm font-receipt font-semibold mb-2 text-pink-300">Customer Name</label>
-                <input type="text" id="customer-name" placeholder="Customer Name" class="w-full bg-zinc-950 border border-pink-500/50 text-pink-100 rounded-lg p-3 outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
+                <label class="block text-sm font-receipt font-semibold mb-2 text-pink-600 dark:text-pink-300">Customer Name</label>
+                <input type="text" id="customer-name" placeholder="Name" class="w-full bg-slate-50 dark:bg-zinc-950 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 rounded-lg p-3 outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
             </div>
             <div>
-                <label class="block text-sm font-receipt font-semibold mb-2 text-pink-300">Customer Contact</label>
-                <input type="tel" id="customer-phone" placeholder="09XX XXX XXXX" class="w-full bg-zinc-950 border border-pink-500/50 text-pink-100 rounded-lg p-3 outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
-            </div>
-            <div>
-                <label class="block text-sm font-receipt font-semibold mb-2 text-pink-300">Delivery Fee (₱)</label>
-                <input type="number" id="shipping-fee" value="0" class="w-full bg-zinc-950 border border-pink-500/50 text-pink-100 rounded-lg p-3 outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
+                <label class="block text-sm font-receipt font-semibold mb-2 text-pink-600 dark:text-pink-300">Customer Contact</label>
+                <input type="tel" id="customer-phone" placeholder="09XX XXX XXXX" class="w-full bg-slate-50 dark:bg-zinc-950 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 rounded-lg p-3 outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
             </div>
         </div>
 
-        <!-- Dynamic Products Section -->
-        <div>
-            <label class="block text-sm font-receipt font-semibold mb-2 text-pink-300">Products</label>
-            <div id="items-container" class="space-y-4 overflow-hidden">
-                
-                <!-- NEW GRID RATIO: 8fr 2.5fr 1.5fr 1fr 0 -->
-                <div class="item-row bg-zinc-950/50 p-3 rounded-lg border border-pink-500/20 grid grid-cols-[8fr_2.5fr_1.5fr_1fr_0] gap-2 items-center">
-                    
-                    <input type="text" placeholder="Item Name" class="item-desc w-full min-w-0 bg-zinc-900 border border-pink-500/50 text-pink-100 rounded-lg p-2 outline-none focus:border-pink-500 transition-colors" oninput="handleDynamicRow(this); updateReceipt();">
-                    
-                    <input type="number" placeholder="Price" class="item-price w-full min-w-0 bg-zinc-900 border border-pink-500/50 text-pink-100 rounded-lg p-2 text-center outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
+        <div class="grid grid-cols-2 gap-4 mb-4">
+            <div>
+                <label class="block text-sm font-receipt font-semibold mb-2 text-pink-600 dark:text-pink-300">Delivery Fee (₱)</label>
+                <input type="number" id="shipping-fee" value="0" class="w-full bg-slate-50 dark:bg-zinc-950 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 rounded-lg p-3 outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
+            </div>
+            <div>
+                <label class="block text-sm font-receipt font-semibold mb-2 text-pink-600 dark:text-pink-300">Payment Mode</label>
+                <div class="relative">
+                    <select id="payment-mode" class="w-full bg-slate-50 dark:bg-zinc-950 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 rounded-lg p-3 appearance-none outline-none focus:border-pink-500 transition-colors cursor-pointer" onchange="toggleTransId(); updateReceipt();">
+                        <option value="Cash">Cash</option>
+                        <option value="GCash">GCash</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3">
+                        <svg class="fill-current h-4 w-4 text-pink-500 drop-shadow-sm dark:drop-shadow-[0_0_3px_rgba(236,72,153,0.8)]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                            <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                    <!-- Dropdown for Quantity with Neon Arrow -->
+        <div id="trans-id-container" class="hidden mb-6">
+            <label class="block text-sm font-receipt font-semibold mb-2 text-pink-600 dark:text-pink-300">Ref / Trans ID</label>
+            <input type="text" id="trans-id" placeholder="Transaction No." class="w-full bg-slate-50 dark:bg-zinc-950 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 rounded-lg p-3 outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
+        </div>
+
+        <div class="dashed-line no-print mb-6"></div>
+
+        <div>
+            <div class="flex justify-between items-end mb-2">
+                <label class="block text-sm font-receipt font-semibold text-pink-600 dark:text-pink-300">Products</label>
+            </div>
+            
+            <div class="grid grid-cols-[6fr_2.5fr_1.5fr_2fr_1fr_0] gap-2 px-2 pb-1 text-[11px] font-bold text-pink-600 dark:text-pink-400 font-receipt text-center uppercase tracking-wide">
+                <div class="text-left">Item Name</div>
+                <div>Price</div>
+                <div>Qty</div>
+                <div>Disc</div>
+                <div>Pic</div>
+                <div></div>
+            </div>
+
+            <div id="items-container" class="space-y-3 overflow-hidden">
+                <div class="item-row bg-slate-50 dark:bg-zinc-950/50 p-2 rounded-lg border border-pink-200 dark:border-pink-500/20 grid grid-cols-[6fr_2.5fr_1.5fr_2fr_1fr_0] gap-2 items-center transition-colors duration-300">
+                    
+                    <input type="text" placeholder="Item Name" class="item-desc w-full min-w-0 bg-white dark:bg-zinc-900 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 rounded-lg p-2 outline-none focus:border-pink-500 transition-colors" oninput="handleDynamicRow(this); updateReceipt();">
+                    <input type="number" placeholder="Price" class="item-price w-full min-w-0 bg-white dark:bg-zinc-900 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 rounded-lg p-2 text-center outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
+                    
                     <div class="relative w-full min-w-0">
-                        <select class="item-qty w-full bg-zinc-900 border border-pink-500/50 text-pink-100 rounded-lg p-2 appearance-none outline-none focus:border-pink-500 transition-colors cursor-pointer text-center pl-2 pr-5" onchange="updateReceipt()">
+                        <select class="item-qty w-full bg-white dark:bg-zinc-900 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 rounded-lg p-2 appearance-none outline-none focus:border-pink-500 transition-colors cursor-pointer text-center pl-2 pr-4" onchange="updateReceipt()">
                             <option value="1">1</option>
                             <option value="2">2</option>
                             <option value="3">3</option>
@@ -140,96 +199,106 @@
                             <option value="10">10</option>
                         </select>
                         <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-1">
-                            <svg class="fill-current h-4 w-4 text-pink-500 drop-shadow-[0_0_3px_rgba(236,72,153,0.8)]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                            <svg class="fill-current h-3 w-3 text-pink-500 drop-shadow-sm dark:drop-shadow-[0_0_3px_rgba(236,72,153,0.8)]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                                 <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
                             </svg>
                         </div>
                     </div>
-                    
+
+                    <input type="number" placeholder="Disc" class="item-disc w-full min-w-0 bg-white dark:bg-zinc-900 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 rounded-lg p-2 text-center outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
+
                     <label class="camera-button">
                         <span>+</span>
                         <input type="file" accept="image/*" class="item-image hidden" onchange="handleImageUpload(this); updateReceipt();">
                     </label>
-                    
-                    <!-- Remove button is technically squished by the '0' grid, overflow-hidden keeps it clean -->
                     <div class="overflow-hidden w-full h-full flex items-center justify-center">
-                        <button onclick="removeItem(this)" class="remove-btn invisible text-pink-600 hover:text-pink-400 font-bold px-1 py-1 rounded bg-zinc-900 border border-pink-600/50 text-xs transition-colors whitespace-nowrap">X</button>
+                        <button onclick="removeItem(this)" class="remove-btn invisible text-pink-600 hover:text-pink-700 dark:hover:text-pink-400 font-bold px-1 py-1 rounded bg-slate-200 dark:bg-zinc-900 border border-pink-400 dark:border-pink-600/50 text-xs transition-colors whitespace-nowrap">X</button>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
 
-    <!-- RECEIPT PREVIEW -->
-    <div id="receipt-container" class="max-w-md mx-auto bg-zinc-950 border-2 border-pink-500 shadow-[0_0_20px_rgba(236,72,153,0.3)] p-8 font-receipt text-base text-pink-100 relative rounded-md">
+    <div id="receipt-container" class="max-w-md mx-auto flex flex-col min-h-[650px] bg-white dark:bg-zinc-950 border-2 border-pink-400 dark:border-pink-500 shadow-xl dark:shadow-[0_0_20px_rgba(236,72,153,0.3)] p-8 font-receipt text-base text-slate-800 dark:text-pink-100 relative rounded-md transition-colors duration-300">
         
-        <div class="text-center mb-8">
-            <h1 id="display-biz-name" class="text-4xl font-bold tracking-widest text-pink-400 neon-text font-header mb-1 leading-none">Elena's Fine Goods</h1>
-            <p class="text-[10px] text-pink-300/70 uppercase tracking-widest mt-1">Acknowledgement Receipt</p>
-        </div>
-
-        <div class="mb-6 text-pink-200 text-sm space-y-2">
-            <div class="flex justify-between">
-                <span>Date:</span>
-                <span id="display-date" class="font-bold">-----</span>
+        <div>
+            <div class="text-center mb-8">
+                <h1 id="display-biz-name" class="text-4xl font-bold tracking-widest text-pink-500 neon-text font-header mb-1 leading-none">Elena's Fine Goods</h1>
+                <p class="text-[7px] text-pink-600 dark:text-pink-300/70 uppercase tracking-widest mt-1">Acknowledgement Receipt</p>
             </div>
-            <div class="flex justify-between">
-                <span>Billed To:</span>
-                <span id="display-name" class="font-bold text-pink-400">-----</span>
+
+            <div class="mb-6 text-slate-600 dark:text-pink-200 text-sm space-y-2">
+                <div class="flex justify-between">
+                    <span>Date:</span>
+                    <span id="display-date" class="font-bold">-----</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>Billed To:</span>
+                    <span id="display-name" class="font-bold text-pink-600 dark:text-pink-400">-----</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>Contact:</span>
+                    <span id="display-phone" class="font-bold text-pink-600 dark:text-pink-400">-----</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>Payment:</span>
+                    <span id="display-payment" class="font-bold text-pink-600 dark:text-pink-400">Cash</span>
+                </div>
             </div>
-            <div class="flex justify-between">
-                <span>Contact:</span>
-                <span id="display-phone" class="font-bold text-pink-400">-----</span>
+
+            <div class="dashed-line"></div>
+
+            <div class="grid grid-cols-[1fr,3rem,6rem,7rem] gap-2 font-bold mb-4 uppercase text-xs text-pink-600 dark:text-pink-400 text-right">
+                <span class="text-left">Item Name</span>
+                <span>Qty</span>
+                <span>Price</span>
+                <span>Total</span>
+            </div>
+            
+            <div id="receipt-items-list" class="space-y-4 mb-4 text-sm">
+                </div>
+            
+            <div class="dashed-line"></div>
+
+            <div class="flex justify-between mb-2 mt-4 text-sm">
+                <span class="text-slate-800 dark:text-pink-100">Total</span>
+                <span id="display-gross-total" class="text-pink-600 dark:text-pink-300">₱0.00</span>
+            </div>
+
+            <div class="flex justify-between mb-2 text-sm">
+                <span class="text-slate-800 dark:text-pink-100">Discount</span>
+                <span id="display-total-discount" class="text-green-600 dark:text-green-400">-₱0.00</span>
+            </div>
+
+            <div class="flex justify-between mb-2 text-sm font-bold">
+                <span class="text-slate-800 dark:text-pink-100">Subtotal</span>
+                <span id="display-subtotal" class="text-pink-600 dark:text-pink-300">₱0.00</span>
+            </div>
+
+            <div class="flex justify-between mb-2 text-sm">
+                <span class="text-slate-800 dark:text-pink-100">Delivery Fee</span>
+                <span id="display-shipping" class="text-pink-600 dark:text-pink-300">₱0.00</span>
+            </div>
+
+            <div class="dashed-line"></div>
+
+            <div class="flex justify-between items-center mt-6 mb-4">
+                <span class="font-bold uppercase tracking-wide text-pink-600 dark:text-pink-400">Total Amount Paid</span>
+                <span id="display-total" class="font-bold text-2xl neon-text text-pink-600 dark:text-pink-500">₱0.00</span>
             </div>
         </div>
 
-        <div class="dashed-line"></div>
-
-        <div class="grid grid-cols-[1fr,3rem,6rem,7rem] gap-2 font-bold mb-4 uppercase text-xs text-pink-400 text-right">
-            <span class="text-left">Item Name</span>
-            <span>Qty</span>
-            <span>Price</span>
-            <span>Total</span>
-        </div>
-        
-        <div id="receipt-items-list" class="space-y-5 mb-4 text-sm">
-            <!-- Items inject here -->
-        </div>
-        
-        <div class="dashed-line"></div>
-
-        <div class="flex justify-between mb-2 mt-4 text-sm">
-            <span class="text-pink-100">Subtotal</span>
-            <span id="display-subtotal" class="text-pink-300">₱0.00</span>
-        </div>
-
-        <div class="flex justify-between mb-2 text-sm">
-            <span class="text-pink-100">Delivery Fee</span>
-            <span id="display-shipping" class="text-pink-300">₱0.00</span>
-        </div>
-
-        <div class="dashed-line"></div>
-
-        <div class="flex justify-between items-center mt-6 mb-10">
-            <span class="font-bold uppercase tracking-wide text-pink-400">Total Due</span>
-            <span id="display-total" class="font-bold text-2xl neon-text text-pink-500">₱0.00</span>
-        </div>
-
-        <div class="text-center mt-10">
-            <p class="text-2xl text-pink-400/80 font-note">Thank you for your purchase!</p>
-            <p class="text-xs text-pink-500/50 mt-3 font-receipt tracking-widest">✧ KITTY INVOICE MAKER ✧</p>
+        <div class="text-center mt-auto pt-10">
+            <p class="text-2xl text-pink-600 dark:text-pink-400/80 font-note">Thank you for your purchase!</p>
+            <p class="text-xs text-pink-500 dark:text-pink-500/50 mt-3 font-receipt tracking-widest">✧ KITTY INVOICE MAKER ✧</p>
         </div>
     </div>
 
-    <!-- ACTION BUTTONS -->
-    <div class="fixed bottom-0 left-0 right-0 p-3 bg-zinc-950/90 backdrop-blur-sm border-t border-pink-500/30 no-print flex flex-col items-center gap-2 z-50">
-        
-        <button id="url-tip-btn" class="bg-zinc-800 text-pink-300 text-xs px-4 py-1.5 rounded-full border border-pink-500/30 font-receipt hover:bg-pink-900 transition-colors cursor-help">
+    <div class="fixed bottom-0 left-0 right-0 p-3 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-sm border-t border-pink-300 dark:border-pink-500/30 no-print flex flex-col items-center gap-2 z-40 transition-colors duration-300">
+        <button id="url-tip-btn" class="bg-slate-100 dark:bg-zinc-800 text-pink-600 dark:text-pink-300 text-xs px-4 py-1.5 rounded-full border border-pink-300 dark:border-pink-500/30 font-receipt hover:bg-slate-200 dark:hover:bg-pink-900 transition-colors cursor-help">
             How to Remove Page Link from PDF?
         </button>
-
-        <button onclick="window.print()" class="w-full max-w-xl bg-pink-600 hover:bg-pink-500 text-white font-bold py-3 px-6 rounded-xl shadow-[0_0_10px_rgba(236,72,153,0.5)] active:scale-95 transition-all text-base tracking-wide uppercase font-receipt">
+        <button onclick="window.print()" class="w-full max-w-xl bg-pink-600 hover:bg-pink-500 text-white font-bold py-3 px-6 rounded-xl shadow-lg dark:shadow-[0_0_10px_rgba(236,72,153,0.5)] active:scale-95 transition-all text-base tracking-wide uppercase font-receipt">
             ⚡ Save Digital Bill
         </button>
     </div>
@@ -237,45 +306,100 @@
     <script>
         document.getElementById('display-date').textContent = new Date().toLocaleDateString('en-PH');
 
+        // Theme Toggle Logic
+        function toggleTheme() {
+            const html = document.documentElement;
+            html.classList.toggle('dark');
+            const icon = document.getElementById('theme-icon');
+            if (html.classList.contains('dark')) {
+                icon.textContent = '☀️'; 
+            } else {
+                icon.textContent = '🌙';
+            }
+        }
+
+        function toggleTransId() {
+            const mode = document.getElementById('payment-mode').value;
+            const container = document.getElementById('trans-id-container');
+            if (mode === 'GCash') {
+                container.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
+                document.getElementById('trans-id').value = ''; 
+            }
+        }
+
         function updateReceipt() {
             document.getElementById('display-biz-name').textContent = document.getElementById('biz-name').value;
             document.getElementById('display-name').textContent = document.getElementById('customer-name').value || '-----';
             document.getElementById('display-phone').textContent = document.getElementById('customer-phone').value || '-----';
             
+            const mode = document.getElementById('payment-mode').value;
+            const transId = document.getElementById('trans-id').value;
+            if (mode === 'GCash' && transId.trim() !== '') {
+                document.getElementById('display-payment').textContent = `GCash (Ref: ${transId})`;
+            } else {
+                document.getElementById('display-payment').textContent = mode;
+            }
+
             const itemRows = document.querySelectorAll('.item-row');
             const receiptItemsList = document.getElementById('receipt-items-list');
             receiptItemsList.innerHTML = ''; 
-            let subtotal = 0;
+            
+            let grossTotal = 0;
+            let totalDiscount = 0;
 
             itemRows.forEach((row) => {
-                const desc = row.querySelector('.item-desc').value || '-----';
+                const desc = row.querySelector('.item-desc').value.trim();
+                if (!desc) return; 
+
                 const qty = parseInt(row.querySelector('.item-qty').value) || 1;
                 const price = parseFloat(row.querySelector('.item-price').value) || 0;
+                let discAmt = parseFloat(row.querySelector('.item-disc').value) || 0;
                 const imgSrc = row.dataset.imgSrc;
-                const rowTotal = qty * price;
+                
+                const baseRowTotal = qty * price;
+                if (discAmt > baseRowTotal) discAmt = baseRowTotal;
 
-                subtotal += rowTotal;
+                let finalRowTotal = baseRowTotal - discAmt;
+                
+                let discPercent = 0;
+                if (baseRowTotal > 0 && discAmt > 0) {
+                    discPercent = Math.round((discAmt / baseRowTotal) * 100);
+                }
+
+                grossTotal += baseRowTotal;
+                totalDiscount += discAmt;
 
                 const fPrice = price.toLocaleString('en-PH', {minimumFractionDigits: 2});
-                const fTotal = rowTotal.toLocaleString('en-PH', {minimumFractionDigits: 2});
+                const fTotal = finalRowTotal.toLocaleString('en-PH', {minimumFractionDigits: 2});
+                const fDisc = discAmt.toLocaleString('en-PH', {minimumFractionDigits: 2});
 
                 const itemHtml = `
-                    <div class="receipt-item">
-                        ${imgSrc ? `<div class="mb-3 flex justify-start"><img src="${imgSrc}" class="w-24 h-24 object-cover rounded-md border border-pink-500 shadow-[0_0_8px_rgba(236,72,153,0.4)]"></div>` : ''}
-                        <div class="grid grid-cols-[1fr,3rem,6rem,7rem] gap-2 items-end text-right">
-                            <span class="text-left text-pink-100 truncate">${desc}</span>
-                            <span class="text-pink-100">${qty}</span>
-                            <span class="text-pink-100 whitespace-nowrap">₱${fPrice}</span>
-                            <span class="text-pink-300 whitespace-nowrap">₱${fTotal}</span>
+                    <div class="receipt-item mb-2">
+                        ${imgSrc ? `<div class="mb-2 flex justify-start"><img src="${imgSrc}" class="w-24 h-24 object-cover rounded-md border border-pink-400 dark:border-pink-500 shadow-sm dark:shadow-[0_0_8px_rgba(236,72,153,0.4)]"></div>` : ''}
+                        <div class="grid grid-cols-[1fr,3rem,6rem,7rem] gap-2 items-start text-right">
+                            <div class="text-left text-slate-800 dark:text-pink-100 overflow-hidden">
+                                <div class="truncate">${desc}</div>
+                            </div>
+                            <span class="text-slate-800 dark:text-pink-100 pt-0.5">${qty}</span>
+                            <span class="text-slate-800 dark:text-pink-100 pt-0.5 whitespace-nowrap">₱${fPrice}</span>
+                            <div class="flex flex-col items-end pt-0.5">
+                                <span class="text-pink-600 dark:text-pink-300 whitespace-nowrap">₱${fTotal}</span>
+                                ${discAmt > 0 ? `<span class="text-[10px] text-green-600 dark:text-green-400 mt-0.5 whitespace-nowrap">-₱${fDisc} (${discPercent}%)</span>` : ''}
+                            </div>
                         </div>
                     </div>
                 `;
                 receiptItemsList.insertAdjacentHTML('beforeend', itemHtml);
             });
 
+            const subtotal = grossTotal - totalDiscount;
             const shipping = parseFloat(document.getElementById('shipping-fee').value) || 0;
             const grandTotal = subtotal + shipping;
 
+            document.getElementById('display-gross-total').textContent = '₱' + grossTotal.toLocaleString('en-PH', {minimumFractionDigits: 2});
+            document.getElementById('display-total-discount').textContent = '-₱' + totalDiscount.toLocaleString('en-PH', {minimumFractionDigits: 2});
             document.getElementById('display-subtotal').textContent = '₱' + subtotal.toLocaleString('en-PH', {minimumFractionDigits: 2});
             document.getElementById('display-shipping').textContent = '₱' + shipping.toLocaleString('en-PH', {minimumFractionDigits: 2});
             document.getElementById('display-total').textContent = '₱' + grandTotal.toLocaleString('en-PH', {minimumFractionDigits: 2});
@@ -285,13 +409,13 @@
             const container = document.getElementById('items-container');
             const row = document.createElement('div');
             
-            row.className = 'item-row bg-zinc-950/50 p-3 rounded-lg border border-pink-500/20 grid grid-cols-[8fr_2.5fr_1.5fr_1fr_0] gap-2 items-center';
+            row.className = 'item-row bg-slate-50 dark:bg-zinc-950/50 p-2 rounded-lg border border-pink-200 dark:border-pink-500/20 grid grid-cols-[6fr_2.5fr_1.5fr_2fr_1fr_0] gap-2 items-center transition-colors duration-300';
             row.innerHTML = `
-                <input type="text" placeholder="Item Name" class="item-desc w-full min-w-0 bg-zinc-900 border border-pink-500/50 text-pink-100 rounded-lg p-2 outline-none focus:border-pink-500 transition-colors" oninput="handleDynamicRow(this); updateReceipt();">
-                <input type="number" placeholder="Price" class="item-price w-full min-w-0 bg-zinc-900 border border-pink-500/50 text-pink-100 rounded-lg p-2 text-center outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
+                <input type="text" placeholder="Item Name" class="item-desc w-full min-w-0 bg-white dark:bg-zinc-900 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 rounded-lg p-2 outline-none focus:border-pink-500 transition-colors" oninput="handleDynamicRow(this); updateReceipt();">
+                <input type="number" placeholder="Price" class="item-price w-full min-w-0 bg-white dark:bg-zinc-900 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 rounded-lg p-2 text-center outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt();">
                 
                 <div class="relative w-full min-w-0">
-                    <select class="item-qty w-full bg-zinc-900 border border-pink-500/50 text-pink-100 rounded-lg p-2 appearance-none outline-none focus:border-pink-500 transition-colors cursor-pointer text-center pl-2 pr-5" onchange="updateReceipt()">
+                    <select class="item-qty w-full bg-white dark:bg-zinc-900 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 rounded-lg p-2 appearance-none outline-none focus:border-pink-500 transition-colors cursor-pointer text-center pl-2 pr-4" onchange="updateReceipt()">
                         <option value="1">1</option>
                         <option value="2">2</option>
                         <option value="3">3</option>
@@ -304,11 +428,13 @@
                         <option value="10">10</option>
                     </select>
                     <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-1">
-                        <svg class="fill-current h-4 w-4 text-pink-500 drop-shadow-[0_0_3px_rgba(236,72,153,0.8)]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                        <svg class="fill-current h-3 w-3 text-pink-500 drop-shadow-sm dark:drop-shadow-[0_0_3px_rgba(236,72,153,0.8)]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                             <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
                         </svg>
                     </div>
                 </div>
+
+                <input type="number" placeholder="Disc" class="item-disc w-full min-w-0 bg-white dark:bg-zinc-900 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 rounded-lg p-2 text-center outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
 
                 <label class="camera-button">
                     <span>+</span>
@@ -316,7 +442,7 @@
                 </label>
                 
                 <div class="overflow-hidden w-full h-full flex items-center justify-center">
-                    <button onclick="removeItem(this)" class="remove-btn text-pink-600 hover:text-pink-400 font-bold px-1 py-1 rounded bg-zinc-900 border border-pink-600/50 text-xs transition-colors whitespace-nowrap">X</button>
+                    <button onclick="removeItem(this)" class="remove-btn text-pink-600 hover:text-pink-700 dark:hover:text-pink-400 font-bold px-1 py-1 rounded bg-slate-200 dark:bg-zinc-900 border border-pink-400 dark:border-pink-600/50 text-xs transition-colors whitespace-nowrap">X</button>
                 </div>
             `;
             container.appendChild(row);
