@@ -466,7 +466,7 @@
             
             const isDark = document.documentElement.classList.contains('dark');
             const canvas = await html2canvas(container, {
-                scale: 2, 
+                scale: 4, // Upgraded to 4x resolution for High Definition output
                 useCORS: true, 
                 backgroundColor: isDark ? '#09090b' : '#ffffff' 
             });
