@@ -22,7 +22,7 @@
             --neon-pink-dim: rgba(236, 72, 153, 0.4);
         }
         
-        /* SCALES EVERYTHING DOWN BY 20% FOR MOBILE VIEW */
+        /* SCALES EVERYTHING DOWN BY 20% FOR PROPORTIONAL VIEWING */
         html { font-size: 80%; } 
         
         body { font-family: 'Inter', sans-serif; }
@@ -66,25 +66,24 @@
         .dark .camera-button:active { box-shadow: 0 0 15px var(--neon-pink); }
         .camera-button.has-image { background-color: #be185d; }
 
-        /* PRINT SETTINGS - Scales to A4 & Adds Border/Gap */
+        /* PRINT SETTINGS - Scales to A4 & Forces Layout Reset for Print */
         @media print {
             .no-print { display: none !important; }
-            html, body { height: 100%; margin: 0 !important; padding: 0 !important; }
+            html, body { height: 100%; margin: 0 !important; padding: 0 !important; background: white !important; }
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
             
             #receipt-container { 
-                margin: 10mm auto !important; /* Creates the gap around the entire border */
+                margin: 10mm auto !important; 
                 width: calc(100% - 20mm) !important; 
                 max-width: none !important;
-                min-height: calc(100vh - 20mm) !important; /* Stretches to fill A4 Height perfectly */
+                min-height: calc(100vh - 20mm) !important; 
                 box-shadow: none !important; 
-                border: 2px solid #ec4899 !important; /* Thin pink border */
-                border-radius: 12px !important; /* Smooth corners for the frame */
-                padding: 8% 10% !important; /* Inner spacing */
+                border: 2px solid #ec4899 !important; 
+                border-radius: 12px !important; 
+                padding: 8% 10% !important; 
                 box-sizing: border-box !important;
             }
 
-            /* Dynamically scales text up for the wider/taller A4 Page */
             #receipt-container { font-size: 1.25rem !important; }
             #receipt-container .text-sm { font-size: 1.15rem !important; }
             #receipt-container .text-xs { font-size: 1rem !important; }
@@ -94,7 +93,6 @@
 
             .receipt-item { page-break-inside: avoid; }
         }
-        /* Forces A4 PDF generation */
         @page { size: A4 portrait; margin: 0mm; }
     </style>
 </head>
@@ -104,209 +102,217 @@
         <span id="theme-icon">☀️</span>
     </button>
 
-    <div class="max-w-xl mx-auto text-center mb-6 no-print">
+    <div class="max-w-7xl mx-auto text-center mb-8 no-print">
         <h1 class="text-5xl text-pink-500 tracking-wider neon-text font-header mt-4 mb-2">Kitty Invoice Maker</h1>
         <p class="text-sm text-pink-600 dark:text-pink-300 font-receipt">Acknowledgement Receipt</p>
     </div>
 
-    <div class="max-w-xl mx-auto bg-white dark:bg-zinc-900 border border-pink-300 dark:border-pink-500/30 rounded-2xl p-6 mb-6 no-print neon-border relative transition-colors duration-300">
-        <label class="block text-sm font-receipt font-semibold mb-2 text-pink-600 dark:text-pink-300">Choose Store</label>
-        <div class="relative">
-            <select id="biz-name" class="w-full bg-slate-50 dark:bg-zinc-950 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 font-receipt rounded-lg p-3 appearance-none outline-none focus:border-pink-500 transition-colors cursor-pointer" onchange="updateReceipt()">
-                <option value="Elena's Fine Goods">Elena's Fine Goods</option>
-                <option value="Han Han">Han Han</option>
-            </select>
-            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
-                <svg class="fill-current h-5 w-5 text-pink-500 drop-shadow-sm dark:drop-shadow-[0_0_5px_rgba(236,72,153,0.8)]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                    <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
-                </svg>
-            </div>
-        </div>
-    </div>
-
-    <div class="max-w-xl mx-auto bg-white dark:bg-zinc-900 border border-pink-300 dark:border-pink-500/30 rounded-2xl p-6 mb-8 no-print neon-border transition-colors duration-300">
+    <div class="max-w-7xl mx-auto lg:flex lg:gap-10 items-start print:block">
         
-        <div class="grid grid-cols-2 gap-4 mb-4">
-            <div>
-                <label class="block text-sm font-receipt font-semibold mb-2 text-pink-600 dark:text-pink-300">Customer Name</label>
-                <input type="text" id="customer-name" placeholder="Name" class="w-full bg-slate-50 dark:bg-zinc-950 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 rounded-lg p-3 outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
-            </div>
-            <div>
-                <label class="block text-sm font-receipt font-semibold mb-2 text-pink-600 dark:text-pink-300">Customer Contact</label>
-                <input type="tel" id="customer-phone" placeholder="09XX XXX XXXX" class="w-full bg-slate-50 dark:bg-zinc-950 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 rounded-lg p-3 outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
-            </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-4 mb-4">
-            <div>
-                <label class="block text-sm font-receipt font-semibold mb-2 text-pink-600 dark:text-pink-300">Delivery Fee (₱)</label>
-                <input type="number" id="shipping-fee" value="0" class="w-full bg-slate-50 dark:bg-zinc-950 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 rounded-lg p-3 outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
-            </div>
-            <div>
-                <label class="block text-sm font-receipt font-semibold mb-2 text-pink-600 dark:text-pink-300">Payment Mode</label>
+        <div class="flex-1 w-full max-w-2xl mx-auto lg:max-w-none space-y-6 print:hidden">
+            
+            <div class="bg-white dark:bg-zinc-900 border border-pink-300 dark:border-pink-500/30 rounded-2xl p-6 no-print neon-border relative transition-colors duration-300">
+                <label class="block text-sm font-receipt font-semibold mb-2 text-pink-600 dark:text-pink-300">Choose Store</label>
                 <div class="relative">
-                    <select id="payment-mode" class="w-full bg-slate-50 dark:bg-zinc-950 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 rounded-lg p-3 appearance-none outline-none focus:border-pink-500 transition-colors cursor-pointer" onchange="toggleTransId(); updateReceipt();">
-                        <option value="Cash">Cash</option>
-                        <option value="GCash">GCash</option>
+                    <select id="biz-name" class="w-full bg-slate-50 dark:bg-zinc-950 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 font-receipt rounded-lg p-3 appearance-none outline-none focus:border-pink-500 transition-colors cursor-pointer" onchange="updateReceipt()">
+                        <option value="Elena's Fine Goods">Elena's Fine Goods</option>
+                        <option value="Han Han">Han Han</option>
                     </select>
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3">
-                        <svg class="fill-current h-4 w-4 text-pink-500 drop-shadow-sm dark:drop-shadow-[0_0_3px_rgba(236,72,153,0.8)]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
+                        <svg class="fill-current h-5 w-5 text-pink-500 drop-shadow-sm dark:drop-shadow-[0_0_5px_rgba(236,72,153,0.8)]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                             <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
                         </svg>
                     </div>
                 </div>
             </div>
+
+            <div class="bg-white dark:bg-zinc-900 border border-pink-300 dark:border-pink-500/30 rounded-2xl p-6 no-print neon-border transition-colors duration-300">
+                
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-receipt font-semibold mb-2 text-pink-600 dark:text-pink-300">Customer Name</label>
+                        <input type="text" id="customer-name" placeholder="Name" class="w-full bg-slate-50 dark:bg-zinc-950 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 rounded-lg p-3 outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-receipt font-semibold mb-2 text-pink-600 dark:text-pink-300">Customer Contact</label>
+                        <input type="tel" id="customer-phone" placeholder="09XX XXX XXXX" class="w-full bg-slate-50 dark:bg-zinc-950 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 rounded-lg p-3 outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-receipt font-semibold mb-2 text-pink-600 dark:text-pink-300">Delivery Fee (₱)</label>
+                        <input type="number" id="shipping-fee" value="0" class="w-full bg-slate-50 dark:bg-zinc-950 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 rounded-lg p-3 outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-receipt font-semibold mb-2 text-pink-600 dark:text-pink-300">Payment Mode</label>
+                        <div class="relative">
+                            <select id="payment-mode" class="w-full bg-slate-50 dark:bg-zinc-950 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 rounded-lg p-3 appearance-none outline-none focus:border-pink-500 transition-colors cursor-pointer" onchange="toggleTransId(); updateReceipt();">
+                                <option value="Cash">Cash</option>
+                                <option value="GCash">GCash</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3">
+                                <svg class="fill-current h-4 w-4 text-pink-500 drop-shadow-sm dark:drop-shadow-[0_0_3px_rgba(236,72,153,0.8)]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                    <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="trans-id-container" class="hidden mb-6">
+                    <label class="block text-sm font-receipt font-semibold mb-2 text-pink-600 dark:text-pink-300">Ref / Trans ID</label>
+                    <input type="text" id="trans-id" placeholder="Transaction No." class="w-full bg-slate-50 dark:bg-zinc-950 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 rounded-lg p-3 outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
+                </div>
+
+                <div class="dashed-line no-print mb-6"></div>
+
+                <div>
+                    <div class="flex justify-between items-end mb-2">
+                        <label class="block text-sm font-receipt font-semibold text-pink-600 dark:text-pink-300">Products</label>
+                    </div>
+                    
+                    <div class="grid grid-cols-[6fr_2.5fr_1.5fr_2fr_1fr_0] gap-2 px-2 pb-1 text-[11px] font-bold text-pink-600 dark:text-pink-400 font-receipt text-center uppercase tracking-wide">
+                        <div class="text-left">Item Name</div>
+                        <div>Price</div>
+                        <div>Qty</div>
+                        <div>Disc</div>
+                        <div>Pic</div>
+                        <div></div>
+                    </div>
+
+                    <div id="items-container" class="space-y-3 overflow-hidden">
+                        <div class="item-row bg-slate-50 dark:bg-zinc-950/50 p-2 rounded-lg border border-pink-200 dark:border-pink-500/20 grid grid-cols-[6fr_2.5fr_1.5fr_2fr_1fr_0] gap-2 items-center transition-colors duration-300">
+                            <input type="text" placeholder="Item Name" class="item-desc w-full min-w-0 bg-white dark:bg-zinc-900 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 rounded-lg p-2 outline-none focus:border-pink-500 transition-colors" oninput="handleDynamicRow(this); updateReceipt();">
+                            <input type="number" placeholder="Price" class="item-price w-full min-w-0 bg-white dark:bg-zinc-900 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 rounded-lg p-2 text-center outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
+                            
+                            <div class="relative w-full min-w-0">
+                                <select class="item-qty w-full bg-white dark:bg-zinc-900 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 rounded-lg p-2 appearance-none outline-none focus:border-pink-500 transition-colors cursor-pointer text-center pl-2 pr-4" onchange="updateReceipt()">
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                    <option value="6">6</option>
+                                    <option value="7">7</option>
+                                    <option value="8">8</option>
+                                    <option value="9">9</option>
+                                    <option value="10">10</option>
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-1">
+                                    <svg class="fill-current h-3 w-3 text-pink-500 drop-shadow-sm dark:drop-shadow-[0_0_3px_rgba(236,72,153,0.8)]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                        <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                                    </svg>
+                                </div>
+                            </div>
+
+                            <input type="number" placeholder="Disc" class="item-disc w-full min-w-0 bg-white dark:bg-zinc-900 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 rounded-lg p-2 text-center outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
+
+                            <label class="camera-button">
+                                <span>+</span>
+                                <input type="file" accept="image/*" class="item-image hidden" onchange="handleImageUpload(this); updateReceipt();">
+                            </label>
+                            <div class="overflow-hidden w-full h-full flex items-center justify-center">
+                                <button onclick="removeItem(this)" class="remove-btn invisible text-pink-600 hover:text-pink-700 dark:hover:text-pink-400 font-bold px-1 py-1 rounded bg-slate-200 dark:bg-zinc-900 border border-pink-400 dark:border-pink-600/50 text-xs transition-colors whitespace-nowrap">X</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div id="trans-id-container" class="hidden mb-6">
-            <label class="block text-sm font-receipt font-semibold mb-2 text-pink-600 dark:text-pink-300">Ref / Trans ID</label>
-            <input type="text" id="trans-id" placeholder="Transaction No." class="w-full bg-slate-50 dark:bg-zinc-950 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 rounded-lg p-3 outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
-        </div>
+        <div class="w-full max-w-md mx-auto mt-10 lg:mt-0 lg:w-[480px] lg:flex-shrink-0 lg:sticky lg:top-8 print:w-full print:max-w-none print:block">
+            <div id="receipt-container" class="flex flex-col min-h-[650px] bg-white dark:bg-zinc-950 border-2 border-pink-400 dark:border-pink-500 shadow-xl dark:shadow-[0_0_20px_rgba(236,72,153,0.3)] p-8 font-receipt text-base text-slate-800 dark:text-pink-100 relative rounded-md transition-colors duration-300">
+                
+                <div>
+                    <div class="text-center mb-8">
+                        <h1 id="display-biz-name" class="text-4xl font-bold tracking-widest text-pink-500 neon-text font-header mb-1 leading-none">Elena's Fine Goods</h1>
+                        <p class="text-[7px] text-pink-600 dark:text-pink-300/70 uppercase tracking-widest mt-1">Acknowledgement Receipt</p>
+                    </div>
 
-        <div class="dashed-line no-print mb-6"></div>
-
-        <div>
-            <div class="flex justify-between items-end mb-2">
-                <label class="block text-sm font-receipt font-semibold text-pink-600 dark:text-pink-300">Products</label>
-            </div>
-            
-            <div class="grid grid-cols-[6fr_2.5fr_1.5fr_2fr_1fr_0] gap-2 px-2 pb-1 text-[11px] font-bold text-pink-600 dark:text-pink-400 font-receipt text-center uppercase tracking-wide">
-                <div class="text-left">Item Name</div>
-                <div>Price</div>
-                <div>Qty</div>
-                <div>Disc</div>
-                <div>Pic</div>
-                <div></div>
-            </div>
-
-            <div id="items-container" class="space-y-3 overflow-hidden">
-                <div class="item-row bg-slate-50 dark:bg-zinc-950/50 p-2 rounded-lg border border-pink-200 dark:border-pink-500/20 grid grid-cols-[6fr_2.5fr_1.5fr_2fr_1fr_0] gap-2 items-center transition-colors duration-300">
-                    
-                    <input type="text" placeholder="Item Name" class="item-desc w-full min-w-0 bg-white dark:bg-zinc-900 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 rounded-lg p-2 outline-none focus:border-pink-500 transition-colors" oninput="handleDynamicRow(this); updateReceipt();">
-                    <input type="number" placeholder="Price" class="item-price w-full min-w-0 bg-white dark:bg-zinc-900 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 rounded-lg p-2 text-center outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
-                    
-                    <div class="relative w-full min-w-0">
-                        <select class="item-qty w-full bg-white dark:bg-zinc-900 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 rounded-lg p-2 appearance-none outline-none focus:border-pink-500 transition-colors cursor-pointer text-center pl-2 pr-4" onchange="updateReceipt()">
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                            <option value="5">5</option>
-                            <option value="6">6</option>
-                            <option value="7">7</option>
-                            <option value="8">8</option>
-                            <option value="9">9</option>
-                            <option value="10">10</option>
-                        </select>
-                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-1">
-                            <svg class="fill-current h-3 w-3 text-pink-500 drop-shadow-sm dark:drop-shadow-[0_0_3px_rgba(236,72,153,0.8)]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
-                            </svg>
+                    <div class="mb-6 text-slate-600 dark:text-pink-200 text-sm space-y-2">
+                        <div class="flex justify-between">
+                            <span>Date:</span>
+                            <span id="display-date" class="font-bold">-----</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Billed To:</span>
+                            <span id="display-name" class="font-bold text-pink-600 dark:text-pink-400">-----</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Contact:</span>
+                            <span id="display-phone" class="font-bold text-pink-600 dark:text-pink-400">-----</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Payment:</span>
+                            <span id="display-payment" class="font-bold text-pink-600 dark:text-pink-400">Cash</span>
                         </div>
                     </div>
 
-                    <input type="number" placeholder="Disc" class="item-disc w-full min-w-0 bg-white dark:bg-zinc-900 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 rounded-lg p-2 text-center outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
+                    <div class="dashed-line"></div>
 
-                    <label class="camera-button">
-                        <span>+</span>
-                        <input type="file" accept="image/*" class="item-image hidden" onchange="handleImageUpload(this); updateReceipt();">
-                    </label>
-                    <div class="overflow-hidden w-full h-full flex items-center justify-center">
-                        <button onclick="removeItem(this)" class="remove-btn invisible text-pink-600 hover:text-pink-700 dark:hover:text-pink-400 font-bold px-1 py-1 rounded bg-slate-200 dark:bg-zinc-900 border border-pink-400 dark:border-pink-600/50 text-xs transition-colors whitespace-nowrap">X</button>
+                    <div class="grid grid-cols-[1fr,3rem,6rem,7rem] gap-2 font-bold mb-4 uppercase text-xs text-pink-600 dark:text-pink-400 text-right">
+                        <span class="text-left">Item Name</span>
+                        <span>Qty</span>
+                        <span>Price</span>
+                        <span>Total</span>
+                    </div>
+                    
+                    <div id="receipt-items-list" class="space-y-4 mb-4 text-sm">
+                        </div>
+                    
+                    <div class="dashed-line"></div>
+
+                    <div class="flex justify-between mb-2 mt-4 text-sm">
+                        <span class="text-slate-800 dark:text-pink-100">Total</span>
+                        <span id="display-gross-total" class="text-pink-600 dark:text-pink-300">₱0.00</span>
+                    </div>
+
+                    <div class="flex justify-between mb-2 text-sm">
+                        <span class="text-slate-800 dark:text-pink-100">Discount</span>
+                        <span id="display-total-discount" class="text-green-600 dark:text-green-400">-₱0.00</span>
+                    </div>
+
+                    <div class="flex justify-between mb-2 text-sm font-bold">
+                        <span class="text-slate-800 dark:text-pink-100">Subtotal</span>
+                        <span id="display-subtotal" class="text-pink-600 dark:text-pink-300">₱0.00</span>
+                    </div>
+
+                    <div class="flex justify-between mb-2 text-sm">
+                        <span class="text-slate-800 dark:text-pink-100">Delivery Fee</span>
+                        <span id="display-shipping" class="text-pink-600 dark:text-pink-300">₱0.00</span>
+                    </div>
+
+                    <div class="dashed-line"></div>
+
+                    <div class="flex justify-between items-center mt-6 mb-4">
+                        <span class="font-bold uppercase tracking-wide text-pink-600 dark:text-pink-400">Total Amount Paid</span>
+                        <span id="display-total" class="font-bold text-2xl neon-text text-pink-600 dark:text-pink-500">₱0.00</span>
                     </div>
                 </div>
+
+                <div class="text-center mt-auto pt-10">
+                    <p class="text-2xl text-pink-600 dark:text-pink-400/80 font-note">Thank you for your purchase!</p>
+                    <p class="text-xs text-pink-500 dark:text-pink-500/50 mt-3 font-receipt tracking-widest">✧ KITTY INVOICE MAKER ✧</p>
+                </div>
             </div>
         </div>
     </div>
 
-    <div id="receipt-container" class="max-w-md mx-auto flex flex-col min-h-[650px] bg-white dark:bg-zinc-950 border-2 border-pink-400 dark:border-pink-500 shadow-xl dark:shadow-[0_0_20px_rgba(236,72,153,0.3)] p-8 font-receipt text-base text-slate-800 dark:text-pink-100 relative rounded-md transition-colors duration-300">
-        
-        <div>
-            <div class="text-center mb-8">
-                <h1 id="display-biz-name" class="text-4xl font-bold tracking-widest text-pink-500 neon-text font-header mb-1 leading-none">Elena's Fine Goods</h1>
-                <p class="text-[7px] text-pink-600 dark:text-pink-300/70 uppercase tracking-widest mt-1">Acknowledgement Receipt</p>
-            </div>
-
-            <div class="mb-6 text-slate-600 dark:text-pink-200 text-sm space-y-2">
-                <div class="flex justify-between">
-                    <span>Date:</span>
-                    <span id="display-date" class="font-bold">-----</span>
-                </div>
-                <div class="flex justify-between">
-                    <span>Billed To:</span>
-                    <span id="display-name" class="font-bold text-pink-600 dark:text-pink-400">-----</span>
-                </div>
-                <div class="flex justify-between">
-                    <span>Contact:</span>
-                    <span id="display-phone" class="font-bold text-pink-600 dark:text-pink-400">-----</span>
-                </div>
-                <div class="flex justify-between">
-                    <span>Payment:</span>
-                    <span id="display-payment" class="font-bold text-pink-600 dark:text-pink-400">Cash</span>
-                </div>
-            </div>
-
-            <div class="dashed-line"></div>
-
-            <div class="grid grid-cols-[1fr,3rem,6rem,7rem] gap-2 font-bold mb-4 uppercase text-xs text-pink-600 dark:text-pink-400 text-right">
-                <span class="text-left">Item Name</span>
-                <span>Qty</span>
-                <span>Price</span>
-                <span>Total</span>
-            </div>
-            
-            <div id="receipt-items-list" class="space-y-4 mb-4 text-sm">
-                </div>
-            
-            <div class="dashed-line"></div>
-
-            <div class="flex justify-between mb-2 mt-4 text-sm">
-                <span class="text-slate-800 dark:text-pink-100">Total</span>
-                <span id="display-gross-total" class="text-pink-600 dark:text-pink-300">₱0.00</span>
-            </div>
-
-            <div class="flex justify-between mb-2 text-sm">
-                <span class="text-slate-800 dark:text-pink-100">Discount</span>
-                <span id="display-total-discount" class="text-green-600 dark:text-green-400">-₱0.00</span>
-            </div>
-
-            <div class="flex justify-between mb-2 text-sm font-bold">
-                <span class="text-slate-800 dark:text-pink-100">Subtotal</span>
-                <span id="display-subtotal" class="text-pink-600 dark:text-pink-300">₱0.00</span>
-            </div>
-
-            <div class="flex justify-between mb-2 text-sm">
-                <span class="text-slate-800 dark:text-pink-100">Delivery Fee</span>
-                <span id="display-shipping" class="text-pink-600 dark:text-pink-300">₱0.00</span>
-            </div>
-
-            <div class="dashed-line"></div>
-
-            <div class="flex justify-between items-center mt-6 mb-4">
-                <span class="font-bold uppercase tracking-wide text-pink-600 dark:text-pink-400">Total Amount Paid</span>
-                <span id="display-total" class="font-bold text-2xl neon-text text-pink-600 dark:text-pink-500">₱0.00</span>
-            </div>
+    <div class="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-sm border-t border-pink-300 dark:border-pink-500/30 no-print z-40 transition-colors duration-300">
+        <div class="max-w-7xl mx-auto p-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <button id="url-tip-btn" class="bg-slate-100 dark:bg-zinc-800 text-pink-600 dark:text-pink-300 text-sm px-6 py-3 rounded-full border border-pink-300 dark:border-pink-500/30 font-receipt hover:bg-slate-200 dark:hover:bg-pink-900 transition-colors cursor-help">
+                How to Remove Page Link from PDF?
+            </button>
+            <button onclick="window.print()" class="w-full sm:w-96 bg-pink-600 hover:bg-pink-500 text-white font-bold py-4 px-6 rounded-xl shadow-lg dark:shadow-[0_0_10px_rgba(236,72,153,0.5)] active:scale-95 transition-all text-lg tracking-wide uppercase font-receipt">
+                ⚡ Save Digital Bill
+            </button>
         </div>
-
-        <div class="text-center mt-auto pt-10">
-            <p class="text-2xl text-pink-600 dark:text-pink-400/80 font-note">Thank you for your purchase!</p>
-            <p class="text-xs text-pink-500 dark:text-pink-500/50 mt-3 font-receipt tracking-widest">✧ KITTY INVOICE MAKER ✧</p>
-        </div>
-    </div>
-
-    <div class="fixed bottom-0 left-0 right-0 p-3 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-sm border-t border-pink-300 dark:border-pink-500/30 no-print flex flex-col items-center gap-2 z-40 transition-colors duration-300">
-        <button id="url-tip-btn" class="bg-slate-100 dark:bg-zinc-800 text-pink-600 dark:text-pink-300 text-xs px-4 py-1.5 rounded-full border border-pink-300 dark:border-pink-500/30 font-receipt hover:bg-slate-200 dark:hover:bg-pink-900 transition-colors cursor-help">
-            How to Remove Page Link from PDF?
-        </button>
-        <button onclick="window.print()" class="w-full max-w-xl bg-pink-600 hover:bg-pink-500 text-white font-bold py-3 px-6 rounded-xl shadow-lg dark:shadow-[0_0_10px_rgba(236,72,153,0.5)] active:scale-95 transition-all text-base tracking-wide uppercase font-receipt">
-            ⚡ Save Digital Bill
-        </button>
     </div>
 
     <script>
         document.getElementById('display-date').textContent = new Date().toLocaleDateString('en-PH');
 
-        // Theme Toggle Logic
         function toggleTheme() {
             const html = document.documentElement;
             html.classList.toggle('dark');
@@ -412,7 +418,7 @@
             row.className = 'item-row bg-slate-50 dark:bg-zinc-950/50 p-2 rounded-lg border border-pink-200 dark:border-pink-500/20 grid grid-cols-[6fr_2.5fr_1.5fr_2fr_1fr_0] gap-2 items-center transition-colors duration-300';
             row.innerHTML = `
                 <input type="text" placeholder="Item Name" class="item-desc w-full min-w-0 bg-white dark:bg-zinc-900 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 rounded-lg p-2 outline-none focus:border-pink-500 transition-colors" oninput="handleDynamicRow(this); updateReceipt();">
-                <input type="number" placeholder="Price" class="item-price w-full min-w-0 bg-white dark:bg-zinc-900 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 rounded-lg p-2 text-center outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt();">
+                <input type="number" placeholder="Price" class="item-price w-full min-w-0 bg-white dark:bg-zinc-900 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 rounded-lg p-2 text-center outline-none focus:border-pink-500 transition-colors" oninput="updateReceipt()">
                 
                 <div class="relative w-full min-w-0">
                     <select class="item-qty w-full bg-white dark:bg-zinc-900 border border-pink-300 dark:border-pink-500/50 text-slate-800 dark:text-pink-100 rounded-lg p-2 appearance-none outline-none focus:border-pink-500 transition-colors cursor-pointer text-center pl-2 pr-4" onchange="updateReceipt()">
